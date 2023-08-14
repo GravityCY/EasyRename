@@ -11,6 +11,9 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+/**
+ * A Packet sent from the client to the server that renames the currently opened container.
+ */
 public class RenamePacket implements FabricPacket {
     public static final PacketType<RenamePacket> TYPE = PacketType.create(
             new Identifier(RenameMod.MOD_ID, "rename"),

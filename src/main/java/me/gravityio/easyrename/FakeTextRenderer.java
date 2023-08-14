@@ -12,6 +12,9 @@ import org.joml.Matrix4f;
 
 import java.util.List;
 
+/**
+ * Replaces draw with shadow with a normal draw, because vanilla TextField's only draw with shadow and stuffs
+ */
 public class FakeTextRenderer extends TextRenderer {
     TextRenderer real;
     public FakeTextRenderer(TextRenderer real) {

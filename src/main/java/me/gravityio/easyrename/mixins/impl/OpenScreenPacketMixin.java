@@ -10,6 +10,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Adds some extra data to the OpenScreenS2CPacket in order to let
+ * the client know what is a renameable container <br><br>
+ *
+ * The client doesn't know what block its currently opened screen belongs to,
+ * so from what I can see there's no reliable way to tell the client whether its screen should be renameable
+ */
 @Mixin(OpenScreenS2CPacket.class)
 public class OpenScreenPacketMixin implements NameableAccessor {
     @Unique

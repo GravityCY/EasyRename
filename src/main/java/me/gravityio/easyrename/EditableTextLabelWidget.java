@@ -8,12 +8,15 @@ import net.minecraft.client.gui.widget.TextWidget;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
+/**
+ * A Text Label that is supposed to spawn a TextField when clicked in order to make it editable
+ */
 public class EditableTextLabelWidget extends TextWidget {
     MinecraftClient client;
     TextRenderer textRenderer;
     int sx;
-    boolean isCentered = false;
-    BetterTextField textField;
+    boolean isCentered;
+    ScuffedTextField textField;
 
     public boolean isTyping = false;
 
@@ -34,7 +37,7 @@ public class EditableTextLabelWidget extends TextWidget {
         }
         if (this.isCentered)
             x += 7;
-        this.textField = new BetterTextField(this.client, this.textRenderer, x, y, message, isCentered);
+        this.textField = new ScuffedTextField(this.client, this.textRenderer, x, y, message, isCentered);
         this.textField.onEnter(() -> {
             var rename = Text.literal(this.textField.getText());
             this.setMessage(rename);

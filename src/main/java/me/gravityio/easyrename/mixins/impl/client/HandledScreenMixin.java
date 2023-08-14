@@ -4,8 +4,7 @@ package me.gravityio.easyrename.mixins.impl.client;
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
 import me.gravityio.easyrename.EditableTextLabelWidget;
 import me.gravityio.easyrename.RenameMod;
-import me.gravityio.easyrename.mixins.TransitiveData;
-import me.gravityio.easyrename.mixins.inter.NameableAccessor;
+import me.gravityio.easyrename.GlobalData;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractFurnaceScreen;
@@ -20,6 +19,19 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+/**
+ * Modifies the HandledScreen in order to
+ *  <ul>
+ *      <li>
+ *          When the screen is of a nameable container
+ *          <ul>
+ *              <li>Hide the vanilla container title</li>
+ *              <li>Add our own title widget that is also editable when clicked</li>
+ *              <li>Disallow Closing the screen when Escape is hit in order for the editable name to be cancellable</li>
+ *          </ul>
+ *     </li>
+ * </ul>
+ */
 @Mixin(HandledScreen.class)
 public class HandledScreenMixin extends Screen {
     @Shadow protected int titleX;
@@ -38,7 +50,7 @@ public class HandledScreenMixin extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void onInit(CallbackInfo ci) {
-        this.isNameable = TransitiveData.isNameable;
+        this.isNameable = GlobalData.isNameable;
 
         RenameMod.LOGGER.info("Init Handled Screen");
         if (!this.isNameable) return;
@@ -48,10 +60,7 @@ public class HandledScreenMixin extends Screen {
         var isCentered = false;
         var x = this.titleX + this.x;
         var y = this.titleY + this.y;
-        if (self instanceof AbstractFurnaceScreen<?>) {
-            isCentered = true;
-            x = this.width / 2;
-        } else if (self instanceof BrewingStandScreen) {
+        if (self instanceof AbstractFurnaceScreen<?> || self instanceof BrewingStandScreen) {
             isCentered = true;
             x = this.width / 2;
         }

@@ -6,7 +6,14 @@ import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
-public class BetterTextField extends TextFieldWidget {
+/**
+ * A Scuffed Text Field that's supposed to allow for
+ * <ul>
+ *     <li>centering text</li>
+ *     <li>having some callbacks when enter is pressed</li>
+ * </ul>
+ */
+public class ScuffedTextField extends TextFieldWidget {
     Runnable onUnfocus;
     Runnable onEnter;
 
@@ -15,7 +22,7 @@ public class BetterTextField extends TextFieldWidget {
     boolean isCentered;
     final int sx;
 
-    public BetterTextField(MinecraftClient client, TextRenderer textRenderer, int x, int y, Text text, boolean isCentered) {
+    public ScuffedTextField(MinecraftClient client, TextRenderer textRenderer, int x, int y, Text text, boolean isCentered) {
         super(textRenderer, x, y, 10, textRenderer.fontHeight, text);
         this.setDrawsBackground(false);
 

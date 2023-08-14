@@ -10,6 +10,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.throwables.MixinException;
 
+/**
+ * A Fabric Mod to make containers renameable
+ */
 public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
     public static final String MOD_ID = "renamemod";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
