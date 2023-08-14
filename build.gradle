@@ -10,8 +10,20 @@ project.dependencies.add("minecraft", "com.mojang:minecraft:${project.minecraft_
 project.dependencies.add("mappings", "net.fabricmc:yarn:${project.project.yarn_version}:v2")
 project.dependencies.add("modImplementation", "net.fabricmc:fabric-loader:${project.loader_version}")
 
-repositories {}
-dependencies {}
+loom {
+    accessWidenerPath = file("src/main/resources/easyrename.accesswidener")
+}
+
+repositories {
+    maven { url 'https://jitpack.io' }
+}
+dependencies {
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    implementation("com.github.LlamaLad7:MixinExtras:0.1.1")
+    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
+    include("com.github.LlamaLad7:MixinExtras:0.1.1")
+}
 
 base {
     archivesName = project.mod_id

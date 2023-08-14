@@ -12,16 +12,20 @@
     "issues": "${mod_sources}"
   },
   "license": "${mod_license}",
-  "icon": "assets/example/icon.png",
+  "icon": "assets/easyrename/icon.png",
 
   "environment": "*",
+  "accessWidener": "easyrename.accesswidener",
   "entrypoints": {
     "main": [
-      "me.gravityio.example.ExampleMod"
+      "me.gravityio.easyrename.RenameMod"
+    ],
+    "preLaunch": [
+      "me.gravityio.easyrename.RenameMod"
     ]
   },
   "mixins": [
-    "example.mixins.json"
+    "easyrename.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=${loader_version}",

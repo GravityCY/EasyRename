@@ -1,0 +1,6 @@
+accessWidener v2 named
+
+mutable field net/minecraft/client/gui/screen/Screen title Lnet/minecraft/text/Text;
+
+accessible field net/minecraft/inventory/DoubleInventory first Lnet/minecraft/inventory/Inventory;
+accessible field net/minecraft/inventory/DoubleInventory second Lnet/minecraft/inventory/Inventory;

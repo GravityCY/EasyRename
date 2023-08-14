@@ -1,0 +1,165 @@
+package me.gravityio.easyrename.mixins.impl.client;
+
+
+import com.llamalad7.mixinextras.injector.WrapWithCondition;
+import me.gravityio.easyrename.BetterTextField;
+import me.gravityio.easyrename.RenameMod;
+import me.gravityio.easyrename.mixins.inter.NameableAccessor;
+import me.gravityio.easyrename.network.c2s.RenamePacket;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.AbstractFurnaceScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.text.Text;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+@Mixin(HandledScreen.class)
+public class HandledScreenMixin extends Screen implements NameableAccessor {
+
+    @Unique
+    private BetterTextField input;
+    @Shadow protected int titleX;
+    @Shadow protected int titleY;
+    @Shadow protected int x;
+    @Shadow protected int y;
+    @Shadow protected int backgroundWidth;
+    @Unique
+    boolean isTyping = true;
+    @Unique
+    boolean isNameable = false;
+    @Unique
+    private boolean isCentered;
+
+    protected HandledScreenMixin(Text title) {
+        super(title);
+    }
+
+    @Override
+    public void easyRename$setNameable(boolean n) {
+        this.isNameable = n;
+        RenameMod.LOGGER.info("Set to nameable: {}", this.isNameable);
+    }
+
+    @Override
+    public boolean easyRename$isNameable() {
+        return this.isNameable;
+    }
+
+    @Unique
+    private void setText(Text text) {
+        this.title = text;
+        if (this.isCentered) {
+            var width = this.textRenderer.getWidth(this.title);
+            this.titleX = (this.backgroundWidth - width) / 2;
+        }
+    }
+
+    @Unique
+    private void setTextAll(Text text) {
+        this.setText(text);
+        this.input.setText(this.title.getString());
+    }
+
+    @Unique
+    private void setTyping(boolean typing) {
+        if (this.isTyping == typing) return;
+
+        this.isTyping = typing;
+        this.setFocused(this.isTyping ? this.input : null);
+        this.input.setVisible(this.isTyping);
+    }
+
+    @Inject(method = "init", at = @At("TAIL"))
+    private void onInit(CallbackInfo ci) {
+        HandledScreen<?> self = (HandledScreen<?>) (Object) this;
+        if (self instanceof AbstractFurnaceScreen<?>) {
+            this.isCentered = true;
+        }
+
+        this.input = new BetterTextField(this.client, this.textRenderer, this.x + this.titleX, this.y + this.titleY, this.title, this.isCentered);
+        this.input.onEnter(() -> {
+                this.setTyping(false);
+                this.setText(Text.literal(this.input.getText()));
+                ClientPlayNetworking.send(new RenamePacket(this.title));
+            }
+        );
+        this.input.setMaxLength(100);
+        this.input.onUnfocus(this::setTyping);
+        this.addDrawableChild(this.input);
+        this.setTyping(false);
+    }
+
+    @Override
+    public boolean shouldCloseOnEsc() {
+        return !this.isTyping;
+    }
+
+    @Inject(method = "mouseClicked", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/KeyBinding;matchesMouse(I)Z", ordinal = 0))
+    private void onMouseClicked(double mouseX, double mouseY, int button, CallbackInfoReturnable<Boolean> cir) {
+        if (!this.isNameable) return;
+
+        RenameMod.LOGGER.info("Clicked at X: {}, Y: {}", mouseX, mouseY);
+        RenameMod.LOGGER.info("Title at X: {}, Y: {}", this.titleX, this.titleY);
+
+        var sx = this.titleX + this.x;
+        var sy = this.titleY + this.y;
+        var ex = sx + this.textRenderer.getWidth(this.title);
+        var ey = sy + this.textRenderer.fontHeight;
+        if (mouseX < this.titleX || mouseX > ex || mouseY < this.titleY || mouseY > ey) return;
+        RenameMod.LOGGER.info("Is now typing");
+        this.setTextAll(this.title);
+        this.setTyping(true);
+    }
+
+//    @Inject(
+//            method = "keyPressed",
+//            at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/KeyBinding;matchesKey(II)Z", ordinal = 0),
+//            cancellable = true)
+//    private void onKeyPressed(int keyCode, int scanCode, int modifiers, CallbackInfoReturnable<Boolean> cir) {
+//        if (!this.isNameable || !this.isTyping) return;
+//
+//        if (keyCode == GLFW.GLFW_KEY_BACKSPACE) {
+//            RenameMod.LOGGER.info("Backspace");
+//            var s = this.title.getString();
+//            if (s.isEmpty()) return;
+//            this.setText(Text.literal(s.substring(0, s.length() - 1)));
+//        } else if (keyCode == GLFW.GLFW_KEY_ENTER) {
+//            RenameMod.LOGGER.info("Sending Packet for new title");
+//            ClientPlayNetworking.send(new RenamePacket(this.title));
+//            this.setTyping(false);
+//        } else if (this.client.options.inventoryKey.matchesKey(keyCode, scanCode)){
+//            cir.setReturnValue(true);
+//        } else {
+//            return;
+//        }
+//        cir.setReturnValue(true);
+//    }
+
+//    @Override
+//    public boolean charTyped(char chr, int modifiers) {
+//        return super.charTyped(chr, modifiers);
+//        if (!this.isNameable || !this.isTyping) return super.charTyped(chr, modifiers);
+//        RenameMod.LOGGER.info("Typed " + chr);
+
+//        this.setText(Text.literal(this.title.getString() + chr));
+//        return true;
+//    }
+
+    @WrapWithCondition(
+            method = "drawForeground",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/client/font/TextRenderer;draw(Lnet/minecraft/client/util/math/MatrixStack;Lnet/minecraft/text/Text;FFI)I", ordinal = 0)
+    )
+    private boolean stopDrawingTitle(TextRenderer rend, MatrixStack matrices, Text title, float titleX, float titleY, int color) {
+        return !this.isTyping;
+    }
+}
