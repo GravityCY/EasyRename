@@ -1,20 +1,28 @@
 package me.gravityio.easyrename;
 
+import com.google.gson.FieldNamingPolicy;
+import com.google.gson.GsonBuilder;
 import dev.isxander.yacl3.config.ConfigEntry;
-import dev.isxander.yacl3.config.ConfigInstance;
 import dev.isxander.yacl3.config.GsonConfigInstance;
 import me.gravityio.yaclutils.ConfigScreenFrame;
 import me.gravityio.yaclutils.annotations.Config;
 import me.gravityio.yaclutils.annotations.elements.ScreenOption;
+import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.file.Path;
 
 @Config(namespace = RenameMod.MOD_ID)
 public class ModConfig implements ConfigScreenFrame {
-    public static ConfigInstance<ModConfig> GSON = GsonConfigInstance.createBuilder(ModConfig.class)
-            .setPath(Path.of("config", RenameMod.MOD_ID))
+    private static final GsonBuilder GSON_BUILDER = new GsonBuilder()
+            .setFieldNamingStrategy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
+            .setPrettyPrinting()
+            .setLenient()
+            .serializeNulls();
+    private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve(RenameMod.MOD_ID + ".json");
+    public static GsonConfigInstance<ModConfig> GSON = GsonConfigInstance.createBuilder(ModConfig.class)
+            .overrideGsonBuilder(GSON_BUILDER)
+            .setPath(CONFIG_PATH)
             .build();
-
     public static ModConfig INSTANCE;
 
     /**
@@ -25,4 +33,5 @@ public class ModConfig implements ConfigScreenFrame {
     @ConfigEntry
     @ScreenOption(index = 0)
     public boolean syncItemFrame = false;
+
 }

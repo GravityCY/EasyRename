@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Loggers>
+		<Logger level="all" name="easyrename" additivity="false">
+			<AppenderRef ref="DebugFile" level="debug"/>
+			<AppenderRef ref="SysOut" level="all"/>
+			<AppenderRef ref="LatestFile" level="all"/>
+			<AppenderRef ref="ServerGuiConsole" level="all"/>
+		</Logger>
+	</Loggers>
+</Configuration>

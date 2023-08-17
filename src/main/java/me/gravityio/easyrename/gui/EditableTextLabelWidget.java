@@ -65,8 +65,15 @@ public class EditableTextLabelWidget extends TextWidget {
         if (this.isCentered) {
             this.onUpdateCenterPos(x);
         } else {
+            this.textField.setX(x);
             super.setX(x);
         }
+    }
+
+    @Override
+    public void setY(int y) {
+        this.textField.setY(y);
+        super.setY(y);
     }
 
     /**
