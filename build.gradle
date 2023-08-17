@@ -45,6 +45,7 @@ repositories {
 dependencies {
     modImplementation FAPI("fabric-api", project.fabric_version)
     modImplementation YACL(project.yacl_version)
+    // My library glib is hosted on mavenLocal for the time being until I learn how all that works
     include modImplementation(GLIB("glib-yacl-utils", "1.0"))
 
     implementation("com.github.LlamaLad7:MixinExtras:0.1.1")

@@ -2,7 +2,6 @@ package me.gravityio.easyrename.mixins.impl;
 
 import me.gravityio.easyrename.RenameMod;
 import me.gravityio.easyrename.mixins.inter.BlockPosAccessor;
-import me.gravityio.easyrename.mixins.inter.NameableAccessor;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.util.math.BlockPos;

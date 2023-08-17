@@ -8,6 +8,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
+/**
+ * Probably a better way to do this, but if user is typing in the title, we don't allow this to run.
+ */
 @Mixin(RecipeBookWidget.class)
 public class RecipeBookMixin {
 

@@ -17,6 +17,11 @@ public class ModConfig implements ConfigScreenFrame {
 
     public static ModConfig INSTANCE;
 
+    /**
+     * Whether to also rename item frames nearby a container when it is renamed. <br><br>
+     *
+     * Useful for use with the <a href="https://modrinth.com/mod/inventory-tabs-updated">Inventory Tabs</a> mod
+     */
     @ConfigEntry
     @ScreenOption(index = 0)
     public boolean syncItemFrame = false;

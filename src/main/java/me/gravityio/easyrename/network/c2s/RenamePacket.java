@@ -42,6 +42,12 @@ public class RenamePacket implements FabricPacket {
         return TYPE;
     }
 
+    /**
+     * Renames the container associated with the player's current screen handler.
+     * It checks if the container is a double chest or a lockable block entity.
+     * If it is a double chest, it attempts to rename both chests.
+     * If it is a lockable block entity, it renames it.
+     */
     public void apply(ServerPlayerEntity serverPlayerEntity, PacketSender packetSender) {
         var inv = serverPlayerEntity.currentScreenHandler.slots.get(0).inventory;
 

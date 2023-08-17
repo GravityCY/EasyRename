@@ -70,9 +70,8 @@ public class EditableTextLabelWidget extends TextWidget {
     }
 
     /**
-     * Update where this elements center should be
-     */
-
+    * Update where this elements center should be
+    */
 
     private void onRename() {
         var rename = Text.literal(this.textField.getText());
@@ -82,8 +81,8 @@ public class EditableTextLabelWidget extends TextWidget {
     }
 
     /**
-     * Re-centers this element according to the new center position
-     */
+    * Re-centers this element according to the new center position
+    */
     private void onUpdateCenterPos(int nx) {
         if (this.cx == nx) return;
         this.cx = nx;

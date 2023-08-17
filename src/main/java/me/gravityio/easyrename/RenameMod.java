@@ -5,17 +5,15 @@ import me.gravityio.easyrename.network.c2s.RenamePacket;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.decoration.ItemFrameEntity;
-import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
+import net.minecraft.util.math.Direction;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.spongepowered.asm.mixin.throwables.MixinException;
 
 /**
  * A Fabric Mod to make containers renameable
@@ -37,6 +35,12 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
         RenameEvents.ON_RENAME.register(this::onRename);
     }
 
+
+    /**
+     * Updates the name of all nearby item frames at the given position in the world. <br><br>
+     *
+     * If the config option for {@link ModConfig#syncItemFrame syncItemFrames} is Enabled
+     */
     private void onRename(World world, BlockPos pos, Text newName) {
         if (world.isClient || !ModConfig.INSTANCE.syncItemFrame) return;
 
@@ -45,9 +49,11 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
         var oy = 1.2d;
         var oz = 1.2d;
         if (Helper.isDouble(world, pos)) {
-            lookPos = lookPos.offset(Helper.getChestDirection(world, pos), 0.5d);
-            ox *= 2;
-            oz *= 2;
+            var dir = Helper.getChestDirection(world, pos);
+            var axis = dir.getAxis();
+            lookPos = lookPos.offset(dir, 0.5d);
+            if (axis == Direction.Axis.Z) oz *= 2;
+            if (axis == Direction.Axis.X) ox *= 2;
         }
 
         var box = Box.of(lookPos, ox, oy, oz);
