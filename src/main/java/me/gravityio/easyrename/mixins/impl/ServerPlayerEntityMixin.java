@@ -2,7 +2,7 @@ package me.gravityio.easyrename.mixins.impl;
 
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import me.gravityio.easyrename.RenameMod;
-import me.gravityio.easyrename.mixins.inter.NameableAccessor;
+import me.gravityio.easyrename.mixins.inter.BlockPosAccessor;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.inventory.DoubleInventory;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
@@ -10,6 +10,7 @@ import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,10 +33,20 @@ public abstract class ServerPlayerEntityMixin {
 
         var inv = this.newOne.slots.get(0).inventory;
 
-        var nameable = inv instanceof LockableContainerBlockEntity || inv instanceof DoubleInventory;
+        BlockPos pos = null;
 
-        RenameMod.LOGGER.info("Adding Custom Data of nameable: {}", nameable);
-        ((NameableAccessor)packet).easyRename$setNameable(nameable);
+        if (inv instanceof LockableContainerBlockEntity entity) {
+            pos = entity.getPos();
+        } else if (inv instanceof DoubleInventory dInv) {
+            if (dInv.first instanceof LockableContainerBlockEntity entity) {
+                pos = entity.getPos();
+            } else if (dInv.second instanceof LockableContainerBlockEntity entity) {
+                pos = entity.getPos();
+            }
+        }
+
+        RenameMod.LOGGER.debug("[ServerPlayerEntityMixin] Adding Custom Data of pos: {}", pos);
+        ((BlockPosAccessor)packet).easyRename$setBlockPos(pos);
         this.newOne = null;
         return packet;
     }

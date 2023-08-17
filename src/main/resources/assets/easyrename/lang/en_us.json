@@ -1,0 +1,5 @@
+{
+  "yacl.renamemod.title": "Easy Rename",
+  "yacl.renamemod.syncItemFrame.label": "Rename Item Frame",
+  "yacl.renamemod.syncItemFrame.description": "Whether to rename nearby item frames when renaming a container.\n\nUseful when used with the Item Frame Name functionality of the InventoryTabs mod."
+}

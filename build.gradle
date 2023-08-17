@@ -14,11 +14,38 @@ loom {
     accessWidenerPath = file("src/main/resources/easyrename.accesswidener")
 }
 
-repositories {
-    maven { url 'https://jitpack.io' }
+static def YACL(version) {
+    return "dev.isxander.yacl:yet-another-config-lib-fabric:$version"
 }
+
+static def GLIB(module, version) {
+    return "me.gravityio.goodlib:$module:$version"
+}
+
+static def FAPI(module, version) {
+    return "net.fabricmc.fabric-api:$module:$version"
+}
+
+repositories {
+    mavenLocal()
+    // Mixin Extras
+    maven { url 'https://jitpack.io' }
+    // YACL
+    maven {
+        name "Xander Maven"
+        url 'https://maven.isxander.dev/releases'
+    }
+    // Dependency of YACL
+    maven { url "https://oss.sonatype.org/content/repositories/snapshots" }
+
+    // Mod Menu
+    maven { url "https://maven.terraformersmc.com/releases" }
+}
+
 dependencies {
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+    modImplementation FAPI("fabric-api", project.fabric_version)
+    modImplementation YACL(project.yacl_version)
+    include modImplementation(GLIB("glib-yacl-utils", "1.0"))
 
     implementation("com.github.LlamaLad7:MixinExtras:0.1.1")
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")

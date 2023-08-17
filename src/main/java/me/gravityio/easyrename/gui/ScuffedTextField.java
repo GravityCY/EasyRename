@@ -1,26 +1,27 @@
-package me.gravityio.easyrename;
+package me.gravityio.easyrename.gui;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.widget.TextFieldWidget;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 /**
  * A Scuffed Text Field that's supposed to allow for
  * <ul>
- *     <li>centering text</li>
- *     <li>having some callbacks when enter is pressed</li>
+ *     <li>Centering text</li>
+ *     <li>Having some callbacks when enter is pressed</li>
  * </ul>
  */
 public class ScuffedTextField extends TextFieldWidget {
-    Runnable onUnfocus;
+    Runnable onEscape;
     Runnable onEnter;
 
     final MinecraftClient client;
     final TextRenderer textRenderer;
     boolean isCentered;
-    final int sx;
+    int sx;
 
     public ScuffedTextField(MinecraftClient client, TextRenderer textRenderer, int x, int y, Text text, boolean isCentered) {
         super(textRenderer, x, y, 10, textRenderer.fontHeight, text);
@@ -33,16 +34,14 @@ public class ScuffedTextField extends TextFieldWidget {
         this.sx = x;
 
         this.setText(text.getString());
-        if (this.isCentered) {
-            this.doCenter();
-        } else {
+        if (!this.isCentered) {
             super.setX(x);
         }
         super.setY(y);
     }
 
-    public void onUnfocus(Runnable onFocusChanged) {
-        this.onUnfocus = onFocusChanged;
+    public void onEscape(Runnable onEscape) {
+        this.onEscape = onEscape;
     }
 
     public void onEnter(Runnable onEnter) {
@@ -64,7 +63,7 @@ public class ScuffedTextField extends TextFieldWidget {
 
         if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             this.setFocused(false);
-            this.doUnfocus();
+            this.doEscape();
             return true;
         } else if (keyCode == GLFW.GLFW_KEY_ENTER) {
             this.setFocused(false);
@@ -72,7 +71,13 @@ public class ScuffedTextField extends TextFieldWidget {
             return true;
         }
 
-        return this.client.options.inventoryKey.matchesKey(keyCode, scanCode);
+        for (net.minecraft.client.option.KeyBinding key : this.client.options.hotbarKeys) {
+            if (!key.matchesKey(keyCode, scanCode)) continue;
+            return true;
+        }
+
+        return this.client.options.inventoryKey.matchesKey(keyCode, scanCode)
+                || this.client.options.chatKey.matchesKey(keyCode, scanCode);
     }
 
     @Override
@@ -101,13 +106,24 @@ public class ScuffedTextField extends TextFieldWidget {
         super.setX(this.sx - super.width / 2);
     }
 
-    private void doUnfocus() {
-        if (this.onUnfocus == null) return;
-        this.onUnfocus.run();
+    private void doEscape() {
+        if (this.onEscape == null) return;
+        this.onEscape.run();
     }
 
     private void doEnter() {
         if (this.onEnter == null) return;
         this.onEnter.run();
+    }
+
+    @Override
+    public void setX(int x) {
+        if (this.isCentered) {
+            this.sx = x;
+            this.doResize();
+            if (this.isCentered) this.doCenter();
+        } else {
+            super.setX(x);
+        }
     }
 }

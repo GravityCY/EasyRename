@@ -9,7 +9,9 @@
   ],
   "client": [
     "client.ClientPlayNetworkHandlerMixin",
-    "client.HandledScreenMixin"
+    "client.HandledScreenMixin",
+    "client.RecipeBookMixin",
+    "client.ScreenMixin"
   ],
   "injectors": {
     "defaultRequire": 1

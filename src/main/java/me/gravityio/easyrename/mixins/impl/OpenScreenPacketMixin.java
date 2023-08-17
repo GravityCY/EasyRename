@@ -1,9 +1,11 @@
 package me.gravityio.easyrename.mixins.impl;
 
 import me.gravityio.easyrename.RenameMod;
+import me.gravityio.easyrename.mixins.inter.BlockPosAccessor;
 import me.gravityio.easyrename.mixins.inter.NameableAccessor;
 import net.minecraft.network.PacketByteBuf;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
+import net.minecraft.util.math.BlockPos;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -18,29 +20,34 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * so from what I can see there's no reliable way to tell the client whether its screen should be renameable
  */
 @Mixin(OpenScreenS2CPacket.class)
-public class OpenScreenPacketMixin implements NameableAccessor {
+public class OpenScreenPacketMixin implements BlockPosAccessor {
+
     @Unique
-    boolean nameable = false;
+    BlockPos pos;
+
     @Override
-    public void easyRename$setNameable(boolean nv) {
-        this.nameable = nv;
+    public BlockPos easyRename$getBlockPos() {
+        return this.pos;
     }
 
     @Override
-    public boolean easyRename$isNameable() {
-        return this.nameable;
+    public void easyRename$setBlockPos(BlockPos pos) {
+        this.pos = pos;
     }
 
     @Inject(method = "write", at = @At("TAIL"))
     private void onSend(PacketByteBuf buf, CallbackInfo ci) {
-        RenameMod.LOGGER.info("Sending OpenScreenPacket of nameable: {}", this.nameable);
-        buf.writeBoolean(this.nameable);
+        this.pos = this.pos == null ? BlockPos.ORIGIN : this.pos;
+        RenameMod.LOGGER.debug("[OpenScreenPacketMixin] Sending OpenScreenPacket of pos: {}", this.pos);
+        buf.writeBlockPos(this.pos);
     }
 
     @Inject(method = "<init>(Lnet/minecraft/network/PacketByteBuf;)V", at = @At("TAIL"))
     private void onReceive(PacketByteBuf buf, CallbackInfo ci) {
-        this.nameable = buf.readBoolean();
-        RenameMod.LOGGER.info("Receiving OpenScreenPacket of nameable: {}", this.nameable);
+        this.pos = buf.readBlockPos();
+        RenameMod.LOGGER.debug("[OpenScreenPacketMixin] Receiving OpenScreenPacket of pos: {}", this.pos);
 
     }
+
+
 }

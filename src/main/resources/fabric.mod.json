@@ -4,7 +4,7 @@
   "name": "${mod_name}",
   "version": "${mod_version}",
   "description": "${mod_description}",
-  "authors": ["${mod_author}"],
+  "authors": ["${mod_author}", "The Dude I Yoinked This From"],
 
   "contact": {
     "homepage": "${mod_sources}",
@@ -22,6 +22,9 @@
     ],
     "preLaunch": [
       "me.gravityio.easyrename.RenameMod"
+    ],
+    "modmenu": [
+      "me.gravityio.easyrename.compat.ModMenuApiImpl"
     ]
   },
   "mixins": [
@@ -29,7 +32,12 @@
   ],
   "depends": {
     "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "yet_another_config_lib_v3": "*",
     "minecraft": "${minecraft_version}",
     "java": ">=17"
+  },
+  "suggests": {
+    "modmenu": "*"
   }
 }

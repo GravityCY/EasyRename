@@ -1,4 +1,4 @@
-package me.gravityio.easyrename;
+package me.gravityio.easyrename.gui;
 
 import net.minecraft.client.font.FontStorage;
 import net.minecraft.client.font.TextHandler;

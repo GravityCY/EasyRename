@@ -1,5 +1,6 @@
 package me.gravityio.easyrename.network.c2s;
 
+import me.gravityio.easyrename.RenameEvents;
 import me.gravityio.easyrename.RenameMod;
 import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
@@ -10,6 +11,8 @@ import net.minecraft.network.PacketByteBuf;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
 
 /**
  * A Packet sent from the client to the server that renames the currently opened container.
@@ -41,20 +44,36 @@ public class RenamePacket implements FabricPacket {
 
     public void apply(ServerPlayerEntity serverPlayerEntity, PacketSender packetSender) {
         var inv = serverPlayerEntity.currentScreenHandler.slots.get(0).inventory;
+
+        boolean isValid = inv instanceof DoubleInventory || inv instanceof LockableContainerBlockEntity;
+
+        if (!isValid) return;
+
+        World world;
+        BlockPos pos;
+
         if (inv instanceof DoubleInventory doubleInventory) {
-            RenameMod.LOGGER.info("Double Inventory");
+            RenameMod.LOGGER.debug("[RenamePacket] Applying as a Double Inventory");
+            RenameMod.LOGGER.debug("Setting Both to {}", this.text.getString());
+
             var first = (LockableContainerBlockEntity) doubleInventory.first;
             var second = (LockableContainerBlockEntity)doubleInventory.second;
-            RenameMod.LOGGER.info("Setting Both to {}", this.text.getString());
             first.setCustomName(this.text);
             second.setCustomName(this.text);
             first.markDirty();
             second.markDirty();
-        } else if (inv instanceof LockableContainerBlockEntity lockable) {
-            RenameMod.LOGGER.info("Lootable Container Block Entity");
-            RenameMod.LOGGER.info("Setting Container to {}", this.text.getString());
+            world = first.getWorld();
+            pos = first.getPos();
+        } else {
+            RenameMod.LOGGER.debug("[RenamePacket] Applying as a Lootable Container");
+            RenameMod.LOGGER.debug("[RenamePacket] Setting Container to {}", this.text.getString());
+
+            LockableContainerBlockEntity lockable = (LockableContainerBlockEntity) inv;
             lockable.setCustomName(this.text);
             lockable.markDirty();
+            world = lockable.getWorld();
+            pos = lockable.getPos();
         }
+        RenameEvents.ON_RENAME.invoker().onRename(world, pos, this.text);
     }
 }
