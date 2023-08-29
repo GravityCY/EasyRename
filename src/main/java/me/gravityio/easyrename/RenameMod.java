@@ -45,9 +45,9 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
         if (world.isClient || !ModConfig.INSTANCE.syncItemFrame) return;
 
         Vec3d lookPos = pos.toCenterPos();
-        var ox = 1.2d;
-        var oy = 1.2d;
-        var oz = 1.2d;
+        var ox = 1.1;
+        var oy = 1.1;
+        var oz = 1.1;
         if (Helper.isDouble(world, pos)) {
             var dir = Helper.getChestDirection(world, pos);
             var axis = dir.getAxis();

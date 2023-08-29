@@ -4,15 +4,15 @@ import com.google.gson.FieldNamingPolicy;
 import com.google.gson.GsonBuilder;
 import dev.isxander.yacl3.config.ConfigEntry;
 import dev.isxander.yacl3.config.GsonConfigInstance;
-import me.gravityio.yaclutils.ConfigScreenFrame;
 import me.gravityio.yaclutils.annotations.Config;
 import me.gravityio.yaclutils.annotations.elements.ScreenOption;
+import me.gravityio.yaclutils.api.ConfigFrame;
 import net.fabricmc.loader.api.FabricLoader;
 
 import java.nio.file.Path;
 
 @Config(namespace = RenameMod.MOD_ID)
-public class ModConfig implements ConfigScreenFrame {
+public class ModConfig implements ConfigFrame<ModConfig> {
     private static final GsonBuilder GSON_BUILDER = new GsonBuilder()
             .setFieldNamingStrategy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .setPrettyPrinting()

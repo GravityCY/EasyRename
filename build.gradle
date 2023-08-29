@@ -79,7 +79,7 @@ dependencies {
     modImplementation FAPI("fabric-api", project.fabric_version)
     modImplementation YACL(project.yacl_version)
     // My library glib is hosted on mavenLocal for the time being until I learn how all that works
-    include modImplementation(GLIB("glib-yacl-utils", "1.0"))
+    include modImplementation(GLIB("glib-yacl-utils", project.glib_version))
 
     // Inventory Tabs
     modLocalRuntime "maven.modrinth:cloth-config:10.1.105+fabric"
