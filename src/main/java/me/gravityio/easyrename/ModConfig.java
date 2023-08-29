@@ -16,7 +16,6 @@ public class ModConfig implements ConfigFrame<ModConfig> {
     private static final GsonBuilder GSON_BUILDER = new GsonBuilder()
             .setFieldNamingStrategy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)
             .setPrettyPrinting()
-            .setLenient()
             .serializeNulls();
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve(RenameMod.MOD_ID + ".json");
     public static GsonConfigInstance<ModConfig> GSON = GsonConfigInstance.createBuilder(ModConfig.class)

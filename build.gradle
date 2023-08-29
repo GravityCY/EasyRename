@@ -26,7 +26,7 @@ modrinth {
         optional.project "modmenu"
         optional.project "inventory-tabs-updated"
     }
-    syncBodyFrom = rootProject.file("README.md").text
+    changelog = "Fixed a bug with renaming Item Frames and updated internal Glib Library version."
 }
 
 project.dependencies.add("minecraft", "com.mojang:minecraft:${project.minecraft_version}")
