@@ -45,7 +45,7 @@ public abstract class ServerPlayerEntityMixin {
             }
         }
 
-        RenameMod.LOGGER.debug("[ServerPlayerEntityMixin] Adding Custom Data of pos: {}", pos);
+        RenameMod.DEBUG("[ServerPlayerEntityMixin] Adding Custom Data of pos: {}", pos);
         ((BlockPosAccessor)packet).easyRename$setBlockPos(pos);
         this.newOne = null;
         return packet;

@@ -59,8 +59,8 @@ public class RenamePacket implements FabricPacket {
         BlockPos pos;
 
         if (inv instanceof DoubleInventory doubleInventory) {
-            RenameMod.LOGGER.debug("[RenamePacket] Applying as a Double Inventory");
-            RenameMod.LOGGER.debug("Setting Both to {}", this.text.getString());
+            RenameMod.DEBUG("[RenamePacket] Applying as a Double Inventory");
+            RenameMod.DEBUG("Setting Both to {}", this.text.getString());
 
             var first = (LockableContainerBlockEntity) doubleInventory.first;
             var second = (LockableContainerBlockEntity)doubleInventory.second;
@@ -71,8 +71,8 @@ public class RenamePacket implements FabricPacket {
             world = first.getWorld();
             pos = first.getPos();
         } else {
-            RenameMod.LOGGER.debug("[RenamePacket] Applying as a Lootable Container");
-            RenameMod.LOGGER.debug("[RenamePacket] Setting Container to {}", this.text.getString());
+            RenameMod.DEBUG("[RenamePacket] Applying as a Lootable Container");
+            RenameMod.DEBUG("[RenamePacket] Setting Container to {}", this.text.getString());
 
             LockableContainerBlockEntity lockable = (LockableContainerBlockEntity) inv;
             lockable.setCustomName(this.text);

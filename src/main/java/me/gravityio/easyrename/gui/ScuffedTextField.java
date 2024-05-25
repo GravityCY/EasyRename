@@ -2,6 +2,7 @@ package me.gravityio.easyrename.gui;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
@@ -45,6 +46,11 @@ public class ScuffedTextField extends TextFieldWidget {
 
     public void onEnter(Runnable onEnter) {
         this.onEnter = onEnter;
+    }
+
+    @Override
+    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+        super.renderButton(context, mouseX, mouseY, delta);
     }
 
     @Override

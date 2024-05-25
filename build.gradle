@@ -9,7 +9,6 @@ group = "me.gravityio"
 
 loom {
     accessWidenerPath = file("src/main/resources/easyrename.accesswidener")
-    log4jConfigs.from(file("log4j.xml"))
 }
 
 modrinth {
@@ -33,20 +32,7 @@ project.dependencies.add("minecraft", "com.mojang:minecraft:${project.minecraft_
 project.dependencies.add("mappings", "net.fabricmc:yarn:${project.project.yarn_version}:v2")
 project.dependencies.add("modImplementation", "net.fabricmc:fabric-loader:${project.loader_version}")
 
-static def YACL(version) {
-    return "dev.isxander.yacl:yet-another-config-lib-fabric:$version"
-}
-
-static def GLIB(module, version) {
-    return "me.gravityio.goodlib:$module:$version"
-}
-
-static def FAPI(module, version) {
-    return "net.fabricmc.fabric-api:$module:$version"
-}
-
 repositories {
-    mavenLocal()
     // Mixin Extras
     maven { url 'https://jitpack.io' }
     // YACL
@@ -59,9 +45,6 @@ repositories {
 
     // Mod Menu
     maven { url "https://maven.terraformersmc.com/releases" }
-
-    // Modrinth
-    maven { url "https://maven.modrinth.com/" }
     exclusiveContent {
         forRepository {
             maven {
@@ -76,14 +59,8 @@ repositories {
 }
 
 dependencies {
-    modImplementation FAPI("fabric-api", project.fabric_version)
-    modImplementation YACL(project.yacl_version)
-    // My library glib is hosted on mavenLocal for the time being until I learn how all that works
-    include modImplementation(GLIB("glib-yacl-utils", project.glib_version))
-
-    // Inventory Tabs
-    modLocalRuntime "maven.modrinth:cloth-config:10.1.105+fabric"
-    modLocalRuntime "maven.modrinth:inventory-tabs-updated:0.9.1-1.19.4-beta"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:$project.fabric_version"
+    modImplementation "dev.isxander.yacl:yet-another-config-lib-fabric:$project.yacl_version"
 
     implementation("com.github.LlamaLad7:MixinExtras:0.1.1")
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")

@@ -4,20 +4,20 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import me.gravityio.easyrename.GlobalData;
 import me.gravityio.easyrename.RenameEvents;
 import me.gravityio.easyrename.RenameMod;
-import me.gravityio.easyrename.gui.EditableTextLabelWidget;
+import me.gravityio.easyrename.gui.EditableLabelWidget;
 import me.gravityio.easyrename.mixins.inter.NameableAccessor;
 import me.gravityio.easyrename.network.c2s.RenamePacket;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.Drawable;
 import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractFurnaceScreen;
 import net.minecraft.client.gui.screen.ingame.BrewingStandScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
@@ -45,7 +45,7 @@ public abstract class ScreenMixin implements NameableAccessor {
     @Unique
     private boolean isNameable;
     @Unique
-    private EditableTextLabelWidget label;
+    private EditableLabelWidget label;
 
     @Shadow protected abstract <T extends Element & Drawable> T addDrawableChild(T drawableElement);
 
@@ -80,10 +80,11 @@ public abstract class ScreenMixin implements NameableAccessor {
     private void onAfterInitDoSetup(MinecraftClient client, int width, int height, CallbackInfo ci) {
         Screen self = (Screen) (Object) this;
         if (!(self instanceof HandledScreen<?> handled) || GlobalData.SCREEN_POS == null) return;
+
         var screenBlock = this.client.world.getBlockEntity(GlobalData.SCREEN_POS);
         this.isNameable = screenBlock instanceof LockableContainerBlockEntity;
         if (!this.isNameable) return;
-        RenameMod.LOGGER.debug("[ScreenMixin] Initializing Nameable Screen with Custom Stuff");
+        RenameMod.DEBUG("[ScreenMixin] Initializing Nameable Screen with Custom Stuff");
 
         var renameBlock = (LockableContainerBlockEntity) screenBlock;
         var isCentered = false;
@@ -94,7 +95,7 @@ public abstract class ScreenMixin implements NameableAccessor {
             x = handled.x + handled.backgroundWidth / 2;
         }
 
-        this.label = new EditableTextLabelWidget(this.client, this.textRenderer, this.title, x, y, isCentered);
+        this.label = new EditableLabelWidget(this.client, this.textRenderer, this.title, x, y, isCentered);
         this.label.onChanged((newText) -> {
             renameBlock.setCustomName(newText);
             RenameEvents.ON_RENAME.invoker().onRename(screenBlock.getWorld(), screenBlock.getPos(), newText);
@@ -123,7 +124,7 @@ public abstract class ScreenMixin implements NameableAccessor {
      */
 
     @Inject(method = "render", at = @At("HEAD"))
-    private void onRenderDoUpdatePositions(MatrixStack matrices, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+    private void onRenderDoUpdatePositions(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         Screen self = (Screen) (Object) this;
         if (!(self instanceof HandledScreen<?> handled) || !this.isNameable) return;
 

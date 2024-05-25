@@ -23,63 +23,28 @@ public class FakeTextRenderer extends TextRenderer {
     }
 
     @Override
-    public int drawWithShadow(MatrixStack matrices, Text text, float x, float y, int color) {
-        return this.real.draw(matrices, text, x, y, color);
-    }
-
-    @Override
-    public int drawWithShadow(MatrixStack matrices, String text, float x, float y, int color) {
-        return this.real.draw(matrices, text, x, y, color);
-    }
-
-    @Override
-    public int drawWithShadow(MatrixStack matrices, String text, float x, float y, int color, boolean rightToLeft) {
-        return this.real.draw(matrices, text, x, y, color);
-    }
-
-    @Override
-    public int draw(MatrixStack matrices, String text, float x, float y, int color) {
-        return this.real.draw(matrices, text, x, y, color);
-    }
-
-    @Override
-    public int drawWithShadow(MatrixStack matrices, OrderedText text, float x, float y, int color) {
-        return this.real.draw(matrices, text, x, y, color);
-    }
-
-    @Override
-    public int draw(MatrixStack matrices, OrderedText text, float x, float y, int color) {
-        return this.real.draw(matrices, text, x, y, color);
-    }
-
-    @Override
-    public int draw(MatrixStack matrices, Text text, float x, float y, int color) {
-        return this.real.draw(matrices, text, x, y, color);
-    }
-
-    @Override
     public String mirror(String text) {
         return this.real.mirror(text);
     }
 
     @Override
     public int draw(String text, float x, float y, int color, boolean shadow, Matrix4f matrix, VertexConsumerProvider vertexConsumers, TextLayerType layerType, int backgroundColor, int light) {
-        return this.real.draw(text, x, y, color, shadow, matrix, vertexConsumers, layerType, backgroundColor, light);
+        return this.real.draw(text, x, y, color, false, matrix, vertexConsumers, layerType, backgroundColor, light);
     }
 
     @Override
     public int draw(String text, float x, float y, int color, boolean shadow, Matrix4f matrix, VertexConsumerProvider vertexConsumers, TextLayerType layerType, int backgroundColor, int light, boolean rightToLeft) {
-        return this.real.draw(text, x, y, color, shadow, matrix, vertexConsumers, layerType, backgroundColor, light, rightToLeft);
+        return this.real.draw(text, x, y, color, false, matrix, vertexConsumers, layerType, backgroundColor, light, rightToLeft);
     }
 
     @Override
     public int draw(Text text, float x, float y, int color, boolean shadow, Matrix4f matrix, VertexConsumerProvider vertexConsumers, TextLayerType layerType, int backgroundColor, int light) {
-        return this.real.draw(text, x, y, color, shadow, matrix, vertexConsumers, layerType, backgroundColor, light);
+        return this.real.draw(text, x, y, color, false, matrix, vertexConsumers, layerType, backgroundColor, light);
     }
 
     @Override
     public int draw(OrderedText text, float x, float y, int color, boolean shadow, Matrix4f matrix, VertexConsumerProvider vertexConsumers, TextLayerType layerType, int backgroundColor, int light) {
-        return this.real.draw(text, x, y, color, shadow, matrix, vertexConsumers, layerType, backgroundColor, light);
+        return this.real.draw(text, x, y, color, false, matrix, vertexConsumers, layerType, backgroundColor, light);
     }
 
     @Override
@@ -115,11 +80,6 @@ public class FakeTextRenderer extends TextRenderer {
     @Override
     public StringVisitable trimToWidth(StringVisitable text, int width) {
         return this.real.trimToWidth(text, width);
-    }
-
-    @Override
-    public void drawTrimmed(MatrixStack matrices, StringVisitable text, int x, int y, int maxWidth, int color) {
-        this.real.drawTrimmed(matrices, text, x, y, maxWidth, color);
     }
 
     @Override

@@ -19,6 +19,6 @@ public class ClientPlayNetworkHandlerMixin {
     @Inject(method = "onOpenScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/s2c/play/OpenScreenS2CPacket;getScreenHandlerType()Lnet/minecraft/screen/ScreenHandlerType;"))
     private void setNameableScreen(OpenScreenS2CPacket packet, CallbackInfo ci) {
         GlobalData.SCREEN_POS = ((BlockPosAccessor)packet).easyRename$getBlockPos();
-        RenameMod.LOGGER.debug("[ClientPlayNetworkHandlerMixin] Setting Global Data of: {}", GlobalData.SCREEN_POS);
+        RenameMod.DEBUG("[ClientPlayNetworkHandlerMixin] Setting Global Data of: {}", GlobalData.SCREEN_POS);
     }
 }

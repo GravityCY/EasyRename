@@ -21,12 +21,18 @@ import org.slf4j.LoggerFactory;
 public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
     public static final String MOD_ID = "renamemod";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    private static final boolean IS_DEBUG = true;
+
+    public static void DEBUG(String s, Object... args) {
+        if (!IS_DEBUG) return;
+        LOGGER.info(s, args);
+    }
 
     @Override
     public void onPreLaunch() {
         MixinExtrasBootstrap.init();
-        ModConfig.GSON.load();
-        ModConfig.INSTANCE = ModConfig.GSON.getConfig();
+        ModConfig.HANDLER.load();
+        ModConfig.INSTANCE = ModConfig.HANDLER.instance();
     }
 
     @Override

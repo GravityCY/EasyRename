@@ -3,8 +3,8 @@ package me.gravityio.easyrename.gui;
 import me.gravityio.easyrename.RenameMod;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.widget.TextWidget;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 import java.util.function.Consumer;
@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 /**
  * A Text Label that is supposed to spawn a TextField when clicked in order to make it editable
  */
-public class EditableTextLabelWidget extends TextWidget {
+public class EditableLabelWidget extends TextWidget {
     MinecraftClient client;
     TextRenderer textRenderer;
     int cx;
@@ -24,7 +24,7 @@ public class EditableTextLabelWidget extends TextWidget {
     private Consumer<Boolean> onTypingChanged;
 
 
-    public EditableTextLabelWidget(MinecraftClient client, TextRenderer textRenderer, Text message, int x, int y, boolean isCentered) {
+    public EditableLabelWidget(MinecraftClient client, TextRenderer textRenderer, Text message, int x, int y, boolean isCentered) {
         super(x, y, 10, textRenderer.fontHeight, message, new FakeTextRenderer(textRenderer));
         this.client = client;
         this.textRenderer = super.getTextRenderer();
@@ -43,7 +43,7 @@ public class EditableTextLabelWidget extends TextWidget {
         super.setTextColor(0x404040);
         super.active = true;
 
-        RenameMod.LOGGER.debug("Made EditableTextLabel. [centered: {}, text: {}]", isCentered, message.getString());
+        RenameMod.DEBUG("Made EditableTextLabel. [centered: {}, text: {}]", isCentered, message.getString());
     }
 
     /**
@@ -79,7 +79,6 @@ public class EditableTextLabelWidget extends TextWidget {
     /**
     * Update where this elements center should be
     */
-
     private void onRename() {
         var rename = Text.literal(this.textField.getText());
         this.setMessage(rename);
@@ -132,12 +131,21 @@ public class EditableTextLabelWidget extends TextWidget {
     }
 
     @Override
-    public void render(MatrixStack matrices, int mouseX, int mouseY, float delta) {
+    public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         if (this.isTyping) {
-            this.textField.render(matrices, mouseX, mouseY, delta);
+            this.textField.render(context, mouseX, mouseY, delta);
         } else {
-            super.render(matrices, mouseX, mouseY, delta);
+            super.render(context, mouseX, mouseY, delta);
         }
+    }
+
+    @Override
+    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+        Text text = this.getMessage();
+        TextRenderer textRenderer = this.getTextRenderer();
+        int i = this.getX() + Math.round((float)(this.getWidth() - textRenderer.getWidth(text)));
+        int j = this.getY() + (this.getHeight() - textRenderer.fontHeight) / 2;
+        context.drawText(textRenderer, text, i, j, this.getTextColor(), false);
     }
 
     @Override
