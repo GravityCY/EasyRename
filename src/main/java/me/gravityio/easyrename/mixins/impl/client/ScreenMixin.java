@@ -2,9 +2,8 @@ package me.gravityio.easyrename.mixins.impl.client;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import me.gravityio.easyrename.GlobalData;
-import me.gravityio.easyrename.RenameEvents;
 import me.gravityio.easyrename.RenameMod;
-import me.gravityio.easyrename.gui.EditableLabelWidget;
+import me.gravityio.easyrename.gui.TextField;
 import me.gravityio.easyrename.mixins.inter.NameableAccessor;
 import me.gravityio.easyrename.network.c2s.RenamePacket;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -17,12 +16,11 @@ import net.minecraft.client.gui.Element;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.AbstractFurnaceScreen;
 import net.minecraft.client.gui.screen.ingame.BrewingStandScreen;
+import net.minecraft.client.gui.screen.ingame.Generic3x3ContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -40,19 +38,17 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *     </li>
  * </ul>
  */
+@Debug(export = true)
 @Mixin(Screen.class)
 public abstract class ScreenMixin implements NameableAccessor {
     @Unique
     private boolean isNameable;
     @Unique
-    private EditableLabelWidget label;
+    private TextField field;
 
     @Shadow protected abstract <T extends Element & Drawable> T addDrawableChild(T drawableElement);
-
     @Shadow @Nullable protected MinecraftClient client;
-
     @Shadow protected TextRenderer textRenderer;
-
     @Shadow protected Text title;
 
     @Override
@@ -87,22 +83,30 @@ public abstract class ScreenMixin implements NameableAccessor {
         RenameMod.DEBUG("[ScreenMixin] Initializing Nameable Screen with Custom Stuff");
 
         var renameBlock = (LockableContainerBlockEntity) screenBlock;
-        var isCentered = false;
-        var x = handled.titleX + handled.x;
-        var y = handled.titleY + handled.y;
-        if (self instanceof AbstractFurnaceScreen<?> || self instanceof BrewingStandScreen) {
-            isCentered = true;
-            x = handled.x + handled.backgroundWidth / 2;
+        var x = handled.x + 8;
+        var y = handled.y + 6;
+        this.field = new TextField(this.textRenderer, x, y, handled.backgroundWidth - 16, this.textRenderer.fontHeight, this.title);
+        if (handled instanceof AbstractFurnaceScreen<?> || handled instanceof BrewingStandScreen || handled instanceof Generic3x3ContainerScreen) {
+            this.field.align(0.5f);
         }
 
-        this.label = new EditableLabelWidget(this.client, this.textRenderer, this.title, x, y, isCentered);
-        this.label.onChanged((newText) -> {
-            renameBlock.setCustomName(newText);
-            RenameEvents.ON_RENAME.invoker().onRename(screenBlock.getWorld(), screenBlock.getPos(), newText);
-            ClientPlayNetworking.send(new RenamePacket(newText));
-        });
-        this.label.onTypingChanged(isTyping -> GlobalData.IS_TYPING = isTyping);
-        this.addDrawableChild(this.label);
+        this.field.onEnter = () -> {
+            var text = Text.literal(this.field.text);
+            renameBlock.setCustomName(text);
+            ClientPlayNetworking.send(new RenamePacket(text));
+        };
+        this.addDrawableChild(this.field);
+    }
+
+    /**
+     * We re-evauluate every frame, because we can't control any side effects in regard to the screen ever changing.<br>
+     * Prime example is the furnace with the recipe book, as soon as the recipe book shifts the whole UI, our text is just hanging
+     */
+    @Inject(method = "render", at = @At("HEAD"))
+    private void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        Screen self = (Screen) (Object) this;
+        if (!(self instanceof HandledScreen<?> handled) || !this.isNameable) return;
+        this.reval(handled);
     }
 
     /**
@@ -112,29 +116,19 @@ public abstract class ScreenMixin implements NameableAccessor {
     @Inject(method = "clearAndInit", at = @At("TAIL"))
     private void onClearDoSetup(CallbackInfo ci) {
         Screen self = (Screen) (Object) this;
-        if (!(self instanceof HandledScreen<?>) || !this.isNameable) return;
-        this.addDrawableChild(this.label);
+        if (!(self instanceof HandledScreen<?> handled) || !this.isNameable) return;
+        this.reval(handled);
+        this.addDrawableChild(this.field);
     }
 
-    /**
-     * Everytime it renders I just try to center the label to
-     * where it probably should be, in case the x and y positions change. <br><br>
-     *
-     * Eg. When the screen gets resized, when the recipe book is opened, stuff gets shifted etc.
-     */
+    @Unique
+    private void reval(HandledScreen<?> handled) {
+        var x = handled.x + 8;
+        var y = handled.y + 6;
+        this.field.setWidth(handled.backgroundWidth - 16);
 
-    @Inject(method = "render", at = @At("HEAD"))
-    private void onRenderDoUpdatePositions(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
-        Screen self = (Screen) (Object) this;
-        if (!(self instanceof HandledScreen<?> handled) || !this.isNameable) return;
-
-        var x = handled.titleX + handled.x;
-        var y = handled.titleY + handled.y;
-        if (self instanceof AbstractFurnaceScreen<?> || self instanceof BrewingStandScreen) {
-            x = handled.x + handled.backgroundWidth / 2;
-        }
-        this.label.setX(x);
-        this.label.setY(y);
+        this.field.setX(x);
+        this.field.setY(y);
     }
 
     /**
@@ -144,6 +138,6 @@ public abstract class ScreenMixin implements NameableAccessor {
     private boolean shouldNotCloseIfTyping(boolean original) {
         Screen self = (Screen) (Object) this;
         if (!(self instanceof HandledScreen<?>) || !this.isNameable) return original;
-        return this.label != null && !this.label.isTyping;
+        return this.field != null && this.field.isDisabled();
     }
 }

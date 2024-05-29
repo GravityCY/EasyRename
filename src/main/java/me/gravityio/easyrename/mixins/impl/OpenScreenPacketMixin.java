@@ -45,7 +45,6 @@ public class OpenScreenPacketMixin implements BlockPosAccessor {
     private void onReceive(PacketByteBuf buf, CallbackInfo ci) {
         this.pos = buf.readBlockPos();
         RenameMod.DEBUG("[OpenScreenPacketMixin] Receiving OpenScreenPacket of pos: {}", this.pos);
-
     }
 
 

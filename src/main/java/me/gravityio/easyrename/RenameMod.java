@@ -3,6 +3,7 @@ package me.gravityio.easyrename;
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import me.gravityio.easyrename.network.c2s.RenamePacket;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.minecraft.entity.decoration.ItemFrameEntity;
