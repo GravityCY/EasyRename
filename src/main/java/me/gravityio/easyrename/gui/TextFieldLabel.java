@@ -1,5 +1,6 @@
 package me.gravityio.easyrename.gui;
 
+import me.gravityio.easyrename.RenameMod;
 import me.gravityio.easyrename.StringHelper;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
@@ -65,6 +66,7 @@ public class TextFieldLabel extends ClickableWidget {
 
     public static int getIndexAt(TextRenderer textRenderer, int x, int sx, String text) {
         int i = MathHelper.floor(x) - sx;
+        RenameMod.DEBUG(String.valueOf(i));
         return textRenderer.trimToWidth(text, i).length();
     }
 
@@ -164,7 +166,12 @@ public class TextFieldLabel extends ClickableWidget {
 
     @Override
     public void onClick(double mouseX, double mouseY) {
-        this.caretIndex = TextFieldLabel.getIndexAt(this.textRenderer, (int) Math.ceil(mouseX), this.renderX, this.text);
+        int i = TextFieldLabel.getIndexAt(this.textRenderer, (int) Math.ceil(mouseX), this.renderX, this.text);
+        if (Screen.hasShiftDown()) {
+            this.setCaretEndIndex(i);
+        } else {
+            this.setCaretIndex(i);
+        }
     }
 
     @Override
