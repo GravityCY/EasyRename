@@ -1,14 +1,14 @@
 # EasyRename
 Easily Rename your Containers, just click on the title, type whatever you want, and press enter!
 
-**Requires <a href="https://modrinth.com/mod/yacl" target="_blank">YACL</a>, <a href="https://modrinth.com/mod/fabric-api" target="_blank">Fabric API</a>**\
-**Suggested to use <a href="https://modrinth.com/mod/modmenu" target="_blank">Mod Menu</a>.**\
+**Requires <a href="${yacl}" target="_blank">YACL</a>, <a href="${fabric}" target="_blank">Fabric API</a>**\
+**Suggested to use <a href="${modmenu}" target="_blank">Mod Menu</a>.**\
 **Should be both on the Client, and the Server**
 
-![JIF](https://i.imgur.com/6mtHhvb.gif)
+![JIF](https://i.ibb.co/Wsx9XFv/java-EKe-VVSoi8-B.gif)
 
-**Also Adds a Config Option to rename Item Frames on containers!**\
-**This Works Really Nicely with <a href="https://modrinth.com/mod/inventory-tabs-updated" target="_blank">InventoryTabs</a> Item Frame Naming Functionality!**
+**Also adds a Config Option to rename Item Frames on containers!**\
+**This works really nicely with <a href="${inventory_tabs}" target="_blank">InventoryTabs</a> Item Frame naming functionality!**
 
 ![JIF 2](https://i.imgur.com/63KV5OY.gif)
 
