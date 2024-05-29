@@ -21,7 +21,7 @@ def dependencyURLS = [
 ]
 
 def changelog = "+ Remade the text field to be my own custom one, so more control"
-def mcVersions = ["1.20.3", "1.20.4"]
+def mcVersions = ["1.20.5"]
 
 version = project.mod_version
 group = "me.gravityio"
