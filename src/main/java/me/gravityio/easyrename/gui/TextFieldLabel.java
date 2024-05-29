@@ -129,32 +129,6 @@ public class TextFieldLabel extends ClickableWidget {
         this.onTextChanged();
     }
 
-    public void writePrev(String str) {
-        if (this.textRenderer.getWidth(this.text + str) > super.width - this.padding * 2) return;
-
-        int s = Math.min(this.caretIndex, this.caretEndIndex);
-        int b = Math.max(this.caretIndex, this.caretEndIndex);
-
-        if (this.caretIndex == this.text.length()) {
-            if (this.caretIndex != this.caretEndIndex) {
-                this.text = this.text.substring(0, this.caretEndIndex) + str;
-            } else {
-                this.text += str;
-            }
-        } else if (this.caretIndex == 0) {
-            if (this.caretIndex != this.caretEndIndex) {
-                this.text = str + this.text.substring(this.caretEndIndex);
-            } else {
-                this.text = str + this.text;
-            }
-        } else {
-            this.text = this.text.substring(0, s) + str + this.text.substring(b);
-        }
-
-        this.setCaretIndex(s + str.length());
-        this.onTextChanged();
-        this.updateWidth();
-    }
     /**
      * Removes an amount of characters at the current caret position either forward or backwards.
      */
