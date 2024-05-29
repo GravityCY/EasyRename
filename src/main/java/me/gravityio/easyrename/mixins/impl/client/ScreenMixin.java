@@ -5,7 +5,7 @@ import me.gravityio.easyrename.GlobalData;
 import me.gravityio.easyrename.RenameMod;
 import me.gravityio.easyrename.gui.TextFieldLabel;
 import me.gravityio.easyrename.mixins.inter.NameableAccessor;
-import me.gravityio.easyrename.network.c2s.RenamePacket;
+import me.gravityio.easyrename.network.c2s.RenamePayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.client.MinecraftClient;
@@ -33,7 +33,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *          <ul>
  *              <li>Hide the vanilla container title</li>
  *              <li>Add our own title widget that is also editable when clicked</li>
- *              <li>Disallow Closing the screen when Escape is hit in order for the editable name to be cancellable</li>
  *          </ul>
  *     </li>
  * </ul>
@@ -92,8 +91,8 @@ public abstract class ScreenMixin implements NameableAccessor {
 
         this.field.onEnterCB = (str) -> {
             var text = Text.literal(str);
-            renameBlock.setCustomName(text);
-            ClientPlayNetworking.send(new RenamePacket(text));
+            renameBlock.customName = text;
+            ClientPlayNetworking.send(new RenamePayload(text));
         };
         this.addDrawableChild(this.field);
     }
@@ -104,8 +103,10 @@ public abstract class ScreenMixin implements NameableAccessor {
      */
     @Inject(method = "render", at = @At("HEAD"))
     private void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
+        GlobalData.IS_TYPING = false;
         Screen self = (Screen) (Object) this;
         if (!(self instanceof HandledScreen<?> handled) || !this.isNameable) return;
+        GlobalData.IS_TYPING = this.field.isFocused();
         this.reval(handled);
     }
 

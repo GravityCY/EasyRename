@@ -354,7 +354,7 @@ public class TextFieldLabel extends ClickableWidget {
     public boolean charTyped(char c, int modifiers) {
         if (this.isDisabled()) return false;
 
-        if (SharedConstants.isValidChar(c)) {
+        if (net.minecraft.util.StringHelper.isValidChar(c)) {
             this.write(String.valueOf(c));
             return true;
         }

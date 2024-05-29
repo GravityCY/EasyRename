@@ -123,7 +123,7 @@ repositories {
 
 dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:$project.fabric_version"
-    modImplementation "dev.isxander.yacl:yet-another-config-lib-fabric:$project.yacl_version"
+    modImplementation "dev.isxander:yet-another-config-lib:$project.yacl_version-fabric"
     modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
 
     implementation("com.github.LlamaLad7:MixinExtras:0.1.1")

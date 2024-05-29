@@ -2,14 +2,15 @@ package me.gravityio.easyrename.network.c2s;
 
 import me.gravityio.easyrename.RenameEvents;
 import me.gravityio.easyrename.RenameMod;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
-import net.fabricmc.fabric.api.networking.v1.PacketType;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.inventory.DoubleInventory;
 import net.minecraft.network.PacketByteBuf;
+import net.minecraft.network.codec.PacketCodec;
+import net.minecraft.network.packet.CustomPayload;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.text.Text;
+import net.minecraft.text.TextCodecs;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -17,29 +18,27 @@ import net.minecraft.world.World;
 /**
  * A Packet sent from the client to the server that renames the currently opened container.
  */
-public class RenamePacket implements FabricPacket {
-    public static final PacketType<RenamePacket> TYPE = PacketType.create(
-            new Identifier(RenameMod.MOD_ID, "rename"),
-            RenamePacket::new);
+public class RenamePayload implements CustomPayload {
+    public static final Id<RenamePayload> ID = CustomPayload.id(new Identifier(RenameMod.MOD_ID, "rename").toString());
+    public static final PacketCodec<PacketByteBuf, RenamePayload> CODEC = PacketCodec.of(RenamePayload::write, RenamePayload::new);
 
     private final Text text;
 
-    public RenamePacket(PacketByteBuf buf) {
-        this(buf.readText());
+    public RenamePayload(PacketByteBuf buf) {
+        this.text = buf.decodeAsJson(TextCodecs.CODEC);
     }
 
-    public RenamePacket(Text text) {
+    public RenamePayload(Text text) {
         this.text = text;
     }
 
-    @Override
     public void write(PacketByteBuf buf) {
-        buf.writeText(this.text);
+        buf.encodeAsJson(TextCodecs.CODEC, this.text);
     }
 
     @Override
-    public PacketType<?> getType() {
-        return TYPE;
+    public Id<? extends CustomPayload> getId() {
+        return ID;
     }
 
     /**
@@ -64,8 +63,8 @@ public class RenamePacket implements FabricPacket {
 
             var first = (LockableContainerBlockEntity) doubleInventory.first;
             var second = (LockableContainerBlockEntity)doubleInventory.second;
-            first.setCustomName(this.text);
-            second.setCustomName(this.text);
+            first.customName = (this.text);
+            second.customName = (this.text);
             first.markDirty();
             second.markDirty();
             world = first.getWorld();
@@ -75,7 +74,7 @@ public class RenamePacket implements FabricPacket {
             RenameMod.DEBUG("[RenamePacket] Setting Container to '{}'", this.text.getString());
 
             LockableContainerBlockEntity lockable = (LockableContainerBlockEntity) inv;
-            lockable.setCustomName(this.text);
+            lockable.customName = (this.text);
             lockable.markDirty();
             world = lockable.getWorld();
             pos = lockable.getPos();

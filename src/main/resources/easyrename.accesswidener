@@ -10,3 +10,5 @@ accessible field net/minecraft/client/gui/screen/ingame/HandledScreen titleX I
 accessible field net/minecraft/client/gui/screen/ingame/HandledScreen titleY I
 accessible field net/minecraft/client/gui/screen/ingame/HandledScreen x I
 accessible field net/minecraft/client/gui/screen/ingame/HandledScreen y I
+
+accessible field net/minecraft/block/entity/LockableContainerBlockEntity customName Lnet/minecraft/text/Text;

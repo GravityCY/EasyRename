@@ -1,11 +1,13 @@
 package me.gravityio.easyrename;
 
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
-import me.gravityio.easyrename.network.c2s.RenamePacket;
+import me.gravityio.easyrename.network.c2s.RenamePayload;
+import me.gravityio.easyrename.network.s2c.ScreenBlockDataPayload;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
+import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -38,7 +40,10 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
 
     @Override
     public void onInitialize() {
-        ServerPlayNetworking.registerGlobalReceiver(RenamePacket.TYPE, RenamePacket::apply);
+        PayloadTypeRegistry.playC2S().register(RenamePayload.ID, RenamePayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(ScreenBlockDataPayload.ID, ScreenBlockDataPayload.CODEC);
+
+        ServerPlayNetworking.registerGlobalReceiver(RenamePayload.ID, (payload, context) -> payload.apply(context.player(), context.responseSender()));
         RenameEvents.ON_RENAME.register(this::onRename);
     }
 
@@ -68,7 +73,7 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
         for (ItemFrameEntity frame : frames) {
             if (frame.getHeldItemStack() == null || frame.getHeldItemStack().isEmpty()) continue;
             var stack = frame.getHeldItemStack();
-            stack.setCustomName(newName);
+            stack.set(DataComponentTypes.CUSTOM_NAME, newName);
             frame.setHeldItemStack(stack);
         }
     }

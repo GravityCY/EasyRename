@@ -17,6 +17,9 @@
   "environment": "*",
   "accessWidener": "easyrename.accesswidener",
   "entrypoints": {
+    "client": [
+      "me.gravityio.easyrename.client.RenameModClient"
+    ],
     "main": [
       "me.gravityio.easyrename.RenameMod"
     ],
