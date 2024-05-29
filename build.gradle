@@ -2,30 +2,93 @@ plugins {
     id "fabric-loom" version "1.3-SNAPSHOT"
     id "maven-publish"
     id "com.modrinth.minotaur" version "2.+"
+    id 'net.darkhax.curseforgegradle' version "1.1.24"
 }
+
+def dependencyURLS = [
+        modrinth: [
+                yacl: "https://modrinth.com/mod/yacl",
+                fabric: "https://modrinth.com/mod/fabric-api",
+                modmenu: "https://modrinth.com/mod/modmenu",
+                inventory_tabs: "https://modrinth.com/mod/inventory-tabs"
+        ],
+        curseforge: [
+                yacl: "https://www.curseforge.com/minecraft/mc-mods/yacl",
+                fabric: "https://www.curseforge.com/minecraft/mc-mods/fabric-api",
+                modmenu: "https://www.curseforge.com/minecraft/mc-mods/modmenu",
+                inventory_tabs: "https://www.curseforge.com/minecraft/mc-mods/inventory-tabs-updated"
+        ]
+]
+
+def changelog = "+ Remade the text field to be my own custom one, so more control"
+def mcVersions = ["1.20"]
 
 version = project.mod_version
 group = "me.gravityio"
+
+def replace(String input, String name, Map<String, Map<String, String>> names) {
+    def cf = file("${name.toUpperCase()}.md");
+
+    def replaced = input
+    names[name].each {
+        replaced = replaced.replace('${'+it.key+'}', it.value)
+    }
+    cf.write(replaced, "UTF-8")
+}
 
 loom {
     accessWidenerPath = file("src/main/resources/easyrename.accesswidener")
 }
 
+tasks.register("readme") {
+    group = "documentation"
+
+    def input = file("README.md")
+    def inputText = input.getText("UTF-8")
+    replace(inputText, "curseforge", dependencyURLS)
+    replace(inputText, "modrinth", dependencyURLS)
+}
+
+tasks.register("publishMod") {
+    group = "publishing"
+
+    dependsOn "publishCurseForge"
+    dependsOn "modrinth"
+}
+
+tasks.register('publishCurseForge', net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    disableVersionDetection()
+
+    group = "publishing"
+    apiToken = System.getenv("CURSEFORGE_UPLOAD");
+
+    def mainFile = upload(1027188, remapJar)
+    mainFile.changelog = changelog
+    mainFile.addGameVersion(mcVersions)
+    mainFile.displayName = "Easy Rename ${mod_version}"
+    mainFile.addModLoader("Fabric")
+    mainFile.releaseType = "release"
+    def fabricApi = "fabric-api"
+    def modmenu= "modmenu"
+    def yacl =  "yacl"
+    mainFile.addRequirement(fabricApi)
+    mainFile.addOptional(modmenu, yacl)
+}
+
 modrinth {
     token = System.getenv("MODRINTH_UPLOAD")
-    projectId = project.mod_id
-    versionName = project.mod_name + " " + project.mod_version
-    versionNumber = project.mod_version
+    projectId = "easyrename"
+    versionName = "Easy Rename $mod_version"
+    versionNumber = mod_version
     uploadFile = remapJar
-    gameVersions = ["1.19.4"]
+    gameVersions = mcVersions
     loaders = ["fabric"]
+    delegate.changelog = changelog
     dependencies {
         required.project "fabric-api"
         required.project "yacl"
         optional.project "modmenu"
-        optional.project "inventory-tabs-updated"
     }
-    changelog = "Fixed a bug with renaming Item Frames and updated internal Glib Library version."
 }
 
 project.dependencies.add("minecraft", "com.mojang:minecraft:${project.minecraft_version}")
