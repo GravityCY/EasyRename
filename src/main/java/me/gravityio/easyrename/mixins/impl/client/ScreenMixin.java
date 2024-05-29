@@ -38,7 +38,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  *     </li>
  * </ul>
  */
-@Debug(export = true)
 @Mixin(Screen.class)
 public abstract class ScreenMixin implements NameableAccessor {
     @Unique

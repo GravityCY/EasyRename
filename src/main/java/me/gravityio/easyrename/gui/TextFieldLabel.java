@@ -13,6 +13,7 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -27,15 +28,45 @@ public class TextFieldLabel extends ClickableWidget {
     protected final TextRenderer textRenderer;
     protected int color = 0x404040;
     protected boolean shadow;
-    protected int caretPosition;
-    protected int caretPositionEnd;
+    protected int caretIndex;
+    protected int caretEndIndex;
     protected int caretColor = 0xffffffff;
     protected float align = 0;
-    protected int caretPositionX = 0;
+    protected int caretPosition = 0;
+    private int caretEndPosition = 0;
     protected int textWidth = 0;
     protected long lastRenderCaret = System.currentTimeMillis();
     protected boolean doRenderCaret;
     protected int padding = 0;
+    private int renderX;
+
+    public static String writeInternal(String target, String add, int caretIndex, int caretEndIndex) {
+        int s = Math.min(caretIndex, caretEndIndex);
+        int b = Math.max(caretIndex, caretEndIndex);
+
+        if (caretIndex == target.length()) {
+            if (caretIndex != caretEndIndex) {
+                target = target.substring(0, caretEndIndex) + add;
+            } else {
+                target += add;
+            }
+        } else if (caretIndex == 0) {
+            if (caretIndex != caretEndIndex) {
+                target = add + target.substring(caretEndIndex);
+            } else {
+                target = add + target;
+            }
+        } else {
+            target = target.substring(0, s) + add + target.substring(b);
+        }
+
+        return target;
+    }
+
+    public static int getIndexAt(TextRenderer textRenderer, int x, int sx, String text) {
+        int i = MathHelper.floor(x) - sx;
+        return textRenderer.trimToWidth(text, i).length();
+    }
 
     public TextFieldLabel(TextRenderer textRenderer, int x, int y, int width, int height, @NotNull Text message) {
         super(x, y, width, height, message);
@@ -43,72 +74,123 @@ public class TextFieldLabel extends ClickableWidget {
         this.setText(super.getMessage().getString());
     }
 
+    public boolean fits(String str) {
+        return this.textRenderer.getWidth(str) < super.width - padding * 2;
+    }
+
     public void padding(int newPadding) {
         this.padding = newPadding;
+        this.updateRenderX();
     }
 
     public void align(float v) {
         this.align = v;
+        this.updateRenderX();
     }
 
     public void setText(String text) {
         this.original = text;
         this.text = text;
         this.updateWidth();
-        this.setCaretPosition(this.text.length());
+        this.updateRenderX();
+        this.setCaretIndex(this.text.length());
     }
 
     public boolean isDisabled() {
         return !super.visible || !super.isFocused();
     }
 
+    /**
+     * Returns the amount of characters needed to delete a whole word from the current caret index
+     */
     public int getDelete(boolean forward) {
-        int ci = StringHelper.getWord(this.caretPosition, this.text, forward);
-        return Math.abs(this.caretPosition - ci);
+        int ci = StringHelper.getWord(this.caretIndex, this.text, forward);
+        return Math.abs(this.caretIndex - ci);
     }
 
     /**
      * Writes a string at the current caret position, and then moves the caret by the length of the given string.
      */
     public void write(String str) {
-        if (this.textRenderer.getWidth(this.text + str) > super.width - this.padding * 2) return;
-
-        if (this.caretPosition == this.text.length()) {
-            this.text += str;
-        } else if (this.caretPosition == 0) {
-            this.text = str + this.text;
+        String t;
+        if (this.caretIndex == this.caretEndIndex) {
+            if (!this.fits(this.text + str)) return;
+            t = TextFieldLabel.writeInternal(this.text, str, this.caretIndex, this.caretEndIndex);
         } else {
-            this.text = this.text.substring(0, this.caretPosition) + str + this.text.substring(this.caretPosition);
+            t = TextFieldLabel.writeInternal(this.text, str, this.caretIndex, this.caretEndIndex);
+            if (!this.fits(t)) return;
         }
 
-        this.onTextChanged();
+        int s = Math.min(this.caretIndex, this.caretEndIndex);
+        this.text = t;
+
+        this.setCaretIndex(s + str.length());
         this.updateWidth();
-        this.setCaretPosition(this.caretPosition + str.length());
+        this.onTextChanged();
     }
 
+    public void writePrev(String str) {
+        if (this.textRenderer.getWidth(this.text + str) > super.width - this.padding * 2) return;
+
+        int s = Math.min(this.caretIndex, this.caretEndIndex);
+        int b = Math.max(this.caretIndex, this.caretEndIndex);
+
+        if (this.caretIndex == this.text.length()) {
+            if (this.caretIndex != this.caretEndIndex) {
+                this.text = this.text.substring(0, this.caretEndIndex) + str;
+            } else {
+                this.text += str;
+            }
+        } else if (this.caretIndex == 0) {
+            if (this.caretIndex != this.caretEndIndex) {
+                this.text = str + this.text.substring(this.caretEndIndex);
+            } else {
+                this.text = str + this.text;
+            }
+        } else {
+            this.text = this.text.substring(0, s) + str + this.text.substring(b);
+        }
+
+        this.setCaretIndex(s + str.length());
+        this.onTextChanged();
+        this.updateWidth();
+    }
     /**
      * Removes an amount of characters at the current caret position either forward or backwards.
      */
-    public void remove(int amount, boolean flip) {
-        amount = flip ? Math.min(this.text.length() - caretPosition, amount) : Math.min(caretPosition, amount);
+    public void remove(int amount, boolean forward) {
+        amount = forward ? Math.min(this.text.length() - caretIndex, amount) : Math.min(caretIndex, amount);
 
-        if (flip) {
-            if (this.caretPosition == 0) {
-                this.text = this.text.substring(amount);
-            } else {
-                this.text = this.text.substring(0, this.caretPosition) + this.text.substring(this.caretPosition + amount);
-            }
+        if (this.caretIndex != this.caretEndIndex) {
+            int s = Math.min(this.caretIndex, this.caretEndIndex);
+            int b = Math.max(this.caretIndex, this.caretEndIndex);
+
+            this.text = this.text.substring(0, s) + this.text.substring(b);
+            this.setCaretIndex(this.caretEndIndex);
         } else {
-            if (this.caretPosition == this.text.length()) {
-                this.text = this.text.substring(0, this.caretPosition - amount);
-            } else if (this.caretPosition > 0 && this.caretPosition < this.text.length()) {
-                this.text = this.text.substring(0, caretPosition - amount) + this.text.substring(caretPosition);
+            if (forward) {
+                if (this.caretIndex == 0) {
+                    this.text = this.text.substring(amount);
+                } else {
+                    this.text = this.text.substring(0, this.caretIndex) + this.text.substring(this.caretIndex + amount);
+                }
+            } else {
+                if (this.caretIndex == this.text.length()) {
+                    this.text = this.text.substring(0, this.caretIndex - amount);
+                } else if (this.caretIndex > 0 && this.caretIndex < this.text.length()) {
+                    this.text = this.text.substring(0, caretIndex - amount) + this.text.substring(caretIndex);
+                }
+                this.setCaretIndex(this.caretIndex - amount);
             }
-            this.setCaretPosition(this.caretPosition - amount);
         }
 
-        this.onTextChanged();
         this.updateWidth();
+        this.onTextChanged();
+    }
+
+    @Override
+    public void onClick(double mouseX, double mouseY) {
+        this.caretIndex = TextFieldLabel.getIndexAt(this.textRenderer, (int) Math.ceil(mouseX), this.renderX, this.text);
     }
 
     @Override
@@ -143,42 +225,89 @@ public class TextFieldLabel extends ClickableWidget {
         } else if (keyCode == GLFW.GLFW_KEY_E) {
             return true;
         } else if (keyCode == GLFW.GLFW_KEY_RIGHT) {
-            if (this.caretPosition == this.text.length()) return false;
+            if (Screen.hasShiftDown()) {
+                if (this.caretEndIndex == this.text.length()) return true;
 
-            int p;
-            if (Screen.hasControlDown()) {
-                p = StringHelper.getStartWord(this.caretPosition, this.text, true);
+                int p;
+                if (Screen.hasControlDown()) {
+                    p = StringHelper.getStartWord(this.caretEndIndex, this.text, true);
+                } else {
+                    p = this.caretEndIndex + 1;
+                }
+
+                this.setCaretEndIndex(p);
             } else {
-                p = this.caretPosition + 1;
-            }
+                if (this.caretIndex == this.text.length()) return true;
 
-            this.setCaretPosition(p);
+                int p;
+                if (Screen.hasControlDown()) {
+                    p = StringHelper.getStartWord(this.caretEndIndex, this.text, true);
+                } else {
+                    if (this.caretIndex == this.caretEndIndex) {
+                        p = this.caretIndex + 1;
+                    } else {
+                        p = this.caretEndIndex;
+                    }
+                }
+
+                this.setCaretIndex(p);
+            }
             return true;
         } else if (keyCode == GLFW.GLFW_KEY_LEFT) {
-            if (this.caretPosition == 0) return false;
-            int p;
-            if (Screen.hasControlDown()) {
-                p = StringHelper.getStartWord(this.caretPosition, this.text, false);
+            if (Screen.hasShiftDown()) {
+                if (this.caretEndIndex == 0) return true;
+
+                int p;
+                if (Screen.hasControlDown()) {
+                    p = StringHelper.getStartWord(this.caretEndIndex, this.text, false);
+                } else {
+                    p = this.caretEndIndex - 1;
+                }
+
+                this.setCaretEndIndex(p);
             } else {
-                p = this.caretPosition - 1;
+                if (this.caretIndex == 0) return true;
+
+                int p;
+                if (Screen.hasControlDown()) {
+                    p = StringHelper.getStartWord(this.caretEndIndex, this.text, false);
+                } else {
+                    if (this.caretIndex == this.caretEndIndex) {
+                        p = this.caretIndex - 1;
+                    } else {
+                        p = this.caretEndIndex;
+                    }
+                }
+
+                this.setCaretIndex(p);
             }
 
-            this.setCaretPosition(p);
             return true;
         } else if (keyCode == GLFW.GLFW_KEY_HOME) {
-            this.setCaretPosition(0);
+            if (Screen.hasShiftDown()) {
+                this.setCaretEndIndex(0);
+            } else {
+                this.setCaretIndex(0);
+            }
             return true;
         } else if (keyCode == GLFW.GLFW_KEY_END) {
-            this.setCaretPosition(this.text.length());
+            if (Screen.hasShiftDown()) {
+                this.setCaretEndIndex(this.text.length());
+            } else {
+                this.setCaretIndex(this.text.length());
+            }
             return true;
         } else if (Screen.isPaste(keyCode)) {
             this.write(MinecraftClient.getInstance().keyboard.getClipboard());
             this.playDownSound(MinecraftClient.getInstance().getSoundManager());
             return true;
         } else if (Screen.isCopy(keyCode)) {
-            MinecraftClient.getInstance().keyboard.setClipboard(this.text);
+            MinecraftClient.getInstance().keyboard.setClipboard(this.text.substring(this.getSmallCaret(), this.getBigCaret()));
             this.playDownSound(MinecraftClient.getInstance().getSoundManager());
             return true;
+        } else if (Screen.isSelectAll(keyCode)) {
+            this.setCaretIndex(0);
+            this.setCaretEndIndex(this.text.length());
         }
         return false;
     }
@@ -201,7 +330,7 @@ public class TextFieldLabel extends ClickableWidget {
 
         MatrixStack s = context.getMatrices();
         s.push();
-        s.translate(super.getX() + this.padding + (super.width - this.padding * 2 - this.textWidth) * align, super.getY(), 0);
+        s.translate(this.renderX, super.getY(), 0);
 
         context.drawText(this.textRenderer, this.text, 0, 0, this.color, this.shadow);
         if (super.isFocused()) {
@@ -209,16 +338,21 @@ public class TextFieldLabel extends ClickableWidget {
                 lastRenderCaret = System.currentTimeMillis();
                 doRenderCaret = !doRenderCaret;
             }
-            if (doRenderCaret) {
-                if (this.caretPosition == this.text.length()) {
-                    context.fill(RenderLayer.getGuiOverlay(), this.caretPositionX, this.textRenderer.fontHeight - 2, this.caretPositionX + 5, this.textRenderer.fontHeight - 1, this.caretColor);
-                } else {
-                    context.fill(RenderLayer.getGuiOverlay(), this.caretPositionX - 1, 0, this.caretPositionX, this.textRenderer.fontHeight + 1, this.caretColor);
+            if (this.caretIndex == this.caretEndIndex) {
+                if (doRenderCaret) {
+                    if (this.caretIndex == this.text.length()) {
+                        context.fill(RenderLayer.getGuiOverlay(), this.caretPosition, this.textRenderer.fontHeight - 2, this.caretPosition + 5, this.textRenderer.fontHeight - 1, this.caretColor);
+                    } else {
+                        context.fill(RenderLayer.getGuiOverlay(), this.caretPosition - 1, 0, this.caretPosition, this.textRenderer.fontHeight + 1, this.caretColor);
+                    }
                 }
+            } else {
+                int a = Math.min(this.caretPosition, this.caretEndPosition);
+                int b = Math.max(this.caretPosition, this.caretEndPosition);
+                context.fill(RenderLayer.getGuiTextHighlight(), a, 0, b, this.textRenderer.fontHeight + 1, -16776961);
             }
         }
 
-//        context.fill(RenderLayer.getGuiTextHighlight(), 0, 0, this.textWidth, this.textRenderer.fontHeight + 1, -16776961);
         s.pop();
     }
 
@@ -233,7 +367,15 @@ public class TextFieldLabel extends ClickableWidget {
         builder.put(NarrationPart.TITLE, this.getNarrationMessage());
     }
 
+    @Override
+    public void setX(int x) {
+        super.setX(x);
+        this.updateRenderX();
+    }
+
     protected void onTextChanged() {
+        this.updateRenderX();
+
         if (this.onChangedCB != null) {
             this.onChangedCB.accept(this.text);
         }
@@ -245,16 +387,43 @@ public class TextFieldLabel extends ClickableWidget {
         }
     }
 
+    private int getSmallCaret() {
+        return Math.min(this.caretIndex, this.caretEndIndex);
+    }
+
+    private int getBigCaret() {
+        return Math.max(this.caretIndex,this.caretEndIndex);
+    }
+
+    private void updateRenderX() {
+        this.renderX = (int) (super.getX() + this.padding + (super.width - this.padding * 2 - this.textWidth) * align);
+    }
+
     private void updateWidth() {
         this.textWidth = this.textRenderer.getWidth(this.text);
     }
 
     private void updateCaretPosition() {
-        this.caretPositionX = this.textRenderer.getWidth(this.text.substring(0, this.caretPosition));
+        this.caretPosition = this.textRenderer.getWidth(this.text.substring(0, this.caretIndex));
+        this.caretEndPosition = this.caretPosition;
     }
 
-    private void setCaretPosition(int i) {
-        this.caretPosition = i;
+    private void updateCaretEndPosition() {
+        this.caretEndPosition = this.textRenderer.getWidth(this.text.substring(0, this.caretEndIndex));
+    }
+
+    private void setCaretIndex(int i) {
+        i = MathHelper.clamp(i, 0, this.text.length());
+
+        this.caretIndex = i;
+        this.caretEndIndex = i;
         this.updateCaretPosition();
+    }
+
+    private void setCaretEndIndex(int i) {
+        i = MathHelper.clamp(i, 0, this.text.length());
+
+        this.caretEndIndex = i;
+        this.updateCaretEndPosition();
     }
 }
