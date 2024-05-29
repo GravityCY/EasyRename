@@ -363,7 +363,7 @@ public class TextFieldLabel extends ClickableWidget {
     }
 
     @Override
-    public void renderButton(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         if (!super.visible) return;
 
         MatrixStack s = context.getMatrices();
