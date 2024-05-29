@@ -1,6 +1,5 @@
 package me.gravityio.easyrename.gui;
 
-import me.gravityio.easyrename.RenameMod;
 import me.gravityio.easyrename.StringHelper;
 import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
@@ -18,8 +17,12 @@ import net.minecraft.util.math.MathHelper;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
+/**
+ * My own custom text field widget
+ */
 public class TextFieldLabel extends ClickableWidget {
     public Consumer<String> onEnterCB;
     public Consumer<String> onChangedCB;
@@ -34,14 +37,51 @@ public class TextFieldLabel extends ClickableWidget {
     protected int caretColor = 0xffffffff;
     protected float align = 0;
     protected int caretPosition = 0;
-    private int caretEndPosition = 0;
+    protected int caretEndPosition = 0;
     protected int textWidth = 0;
     protected long lastRenderCaret = System.currentTimeMillis();
     protected boolean doRenderCaret;
     protected int padding = 0;
-    private int renderX;
+    protected int renderX;
 
-    public static String writeInternal(String target, String add, int caretIndex, int caretEndIndex) {
+    /**
+     * Removes
+     */
+    public static String removeInternal(String target, int amount, int caretIndex, int caretEndIndex, boolean forward, AtomicInteger newIndex) {
+        amount = forward ? Math.min(target.length() - caretIndex, amount) : Math.min(caretIndex, amount);
+
+        if (caretIndex != caretEndIndex) {
+            int s = Math.min(caretIndex, caretEndIndex);
+            int b = Math.max(caretIndex, caretEndIndex);
+
+            target = target.substring(0, s) + target.substring(b);
+            newIndex.set(s);
+        } else {
+            if (amount == 0) return target;
+
+            if (forward) {
+                if (caretIndex == 0) {
+                    target = target.substring(amount);
+                } else {
+                    target = target.substring(0, caretIndex) + target.substring(caretIndex + amount);
+                }
+            } else {
+                if (caretIndex == target.length()) {
+                    target = target.substring(0, caretIndex - amount);
+                } else if (caretIndex > 0 && caretIndex < target.length()) {
+                    target = target.substring(0, caretIndex - amount) + target.substring(caretIndex);
+                }
+                newIndex.set(caretIndex - amount);
+            }
+        }
+
+        return target;
+    }
+
+    /**
+     * Writes
+     */
+    public static String writeInternal(String target, String add, int caretIndex, int caretEndIndex, AtomicInteger newIndex) {
         int s = Math.min(caretIndex, caretEndIndex);
         int b = Math.max(caretIndex, caretEndIndex);
 
@@ -61,12 +101,15 @@ public class TextFieldLabel extends ClickableWidget {
             target = target.substring(0, s) + add + target.substring(b);
         }
 
+        newIndex.set(s + add.length());
         return target;
     }
 
+    /**
+     * Gets which index an x value sits on in a string
+     */
     public static int getIndexAt(TextRenderer textRenderer, int x, int sx, String text) {
         int i = MathHelper.floor(x) - sx;
-        RenameMod.DEBUG(String.valueOf(i));
         return textRenderer.trimToWidth(text, i).length();
     }
 
@@ -114,27 +157,35 @@ public class TextFieldLabel extends ClickableWidget {
      * Writes a string at the current caret position, and then moves the caret by the length of the given string.
      */
     public void write(String str) {
+        AtomicInteger i = new AtomicInteger();
         String t;
         if (this.caretIndex == this.caretEndIndex) {
             if (!this.fits(this.text + str)) return;
-            t = TextFieldLabel.writeInternal(this.text, str, this.caretIndex, this.caretEndIndex);
+            t = TextFieldLabel.writeInternal(this.text, str, this.caretIndex, this.caretEndIndex, i);
         } else {
-            t = TextFieldLabel.writeInternal(this.text, str, this.caretIndex, this.caretEndIndex);
+            t = TextFieldLabel.writeInternal(this.text, str, this.caretIndex, this.caretEndIndex, i);
             if (!this.fits(t)) return;
         }
 
-        int s = Math.min(this.caretIndex, this.caretEndIndex);
         this.text = t;
-
-        this.setCaretIndex(s + str.length());
         this.updateWidth();
         this.onTextChanged();
+        this.setCaretIndex(i.get());
     }
 
     /**
      * Removes an amount of characters at the current caret position either forward or backwards.
      */
     public void remove(int amount, boolean forward) {
+        AtomicInteger i = new AtomicInteger();
+        this.text = TextFieldLabel.removeInternal(this.text, amount, this.caretIndex, this.caretEndIndex, forward, i);
+
+        this.updateWidth();
+        this.onTextChanged();
+        this.setCaretIndex(i.get());
+    }
+
+    public void prevRemove(int amount, boolean forward) {
         amount = forward ? Math.min(this.text.length() - caretIndex, amount) : Math.min(caretIndex, amount);
 
         if (this.caretIndex != this.caretEndIndex) {
@@ -144,6 +195,8 @@ public class TextFieldLabel extends ClickableWidget {
             this.text = this.text.substring(0, s) + this.text.substring(b);
             this.setCaretIndex(this.caretEndIndex);
         } else {
+            if (amount == 0) return;
+
             if (forward) {
                 if (this.caretIndex == 0) {
                     this.text = this.text.substring(amount);
@@ -286,6 +339,10 @@ public class TextFieldLabel extends ClickableWidget {
             MinecraftClient.getInstance().keyboard.setClipboard(this.text.substring(this.getSmallCaret(), this.getBigCaret()));
             this.playDownSound(MinecraftClient.getInstance().getSoundManager());
             return true;
+        } else if (Screen.isCut(keyCode)) {
+            MinecraftClient.getInstance().keyboard.setClipboard(this.text.substring(this.getSmallCaret(), this.getBigCaret()));
+            this.remove(0, true);
+            this.playDownSound(MinecraftClient.getInstance().getSoundManager());
         } else if (Screen.isSelectAll(keyCode)) {
             this.setCaretIndex(0);
             this.setCaretEndIndex(this.text.length());
