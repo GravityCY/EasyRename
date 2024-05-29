@@ -3,7 +3,7 @@ package me.gravityio.easyrename.mixins.impl.client;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import me.gravityio.easyrename.GlobalData;
 import me.gravityio.easyrename.RenameMod;
-import me.gravityio.easyrename.gui.TextField;
+import me.gravityio.easyrename.gui.TextFieldLabel;
 import me.gravityio.easyrename.mixins.inter.NameableAccessor;
 import me.gravityio.easyrename.network.c2s.RenamePacket;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
@@ -44,7 +44,7 @@ public abstract class ScreenMixin implements NameableAccessor {
     @Unique
     private boolean isNameable;
     @Unique
-    private TextField field;
+    private TextFieldLabel field;
 
     @Shadow protected abstract <T extends Element & Drawable> T addDrawableChild(T drawableElement);
     @Shadow @Nullable protected MinecraftClient client;
@@ -83,15 +83,16 @@ public abstract class ScreenMixin implements NameableAccessor {
         RenameMod.DEBUG("[ScreenMixin] Initializing Nameable Screen with Custom Stuff");
 
         var renameBlock = (LockableContainerBlockEntity) screenBlock;
-        var x = handled.x + 8;
+        var x = handled.x;
         var y = handled.y + 6;
-        this.field = new TextField(this.textRenderer, x, y, handled.backgroundWidth - 16, this.textRenderer.fontHeight, this.title);
+        this.field = new TextFieldLabel(this.textRenderer, x, y, handled.backgroundWidth, this.textRenderer.fontHeight, this.title);
+        this.field.padding(8);
         if (handled instanceof AbstractFurnaceScreen<?> || handled instanceof BrewingStandScreen || handled instanceof Generic3x3ContainerScreen) {
             this.field.align(0.5f);
         }
 
-        this.field.onEnter = () -> {
-            var text = Text.literal(this.field.text);
+        this.field.onEnterCB = (str) -> {
+            var text = Text.literal(str);
             renameBlock.setCustomName(text);
             ClientPlayNetworking.send(new RenamePacket(text));
         };
@@ -123,9 +124,10 @@ public abstract class ScreenMixin implements NameableAccessor {
 
     @Unique
     private void reval(HandledScreen<?> handled) {
-        var x = handled.x + 8;
+        var x = handled.x;
         var y = handled.y + 6;
-        this.field.setWidth(handled.backgroundWidth - 16);
+
+        this.field.setWidth(handled.backgroundWidth);
 
         this.field.setX(x);
         this.field.setY(y);

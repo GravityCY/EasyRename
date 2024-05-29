@@ -13,12 +13,17 @@ import net.minecraft.client.render.RenderLayer;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
-public class TextField extends ClickableWidget {
-    public Runnable onEnter;
+import java.util.function.Consumer;
+
+public class TextFieldLabel extends ClickableWidget {
+    public Consumer<String> onEnterCB;
+    public Consumer<String> onChangedCB;
     public String text;
 
+    protected String original;
     protected final TextRenderer textRenderer;
     protected int color = 0x404040;
     protected boolean shadow;
@@ -30,14 +35,24 @@ public class TextField extends ClickableWidget {
     protected int textWidth = 0;
     protected long lastRenderCaret = System.currentTimeMillis();
     protected boolean doRenderCaret;
+    protected int padding = 0;
 
-    public TextField(TextRenderer textRenderer, int x, int y, int width, int height, Text message) {
+    public TextFieldLabel(TextRenderer textRenderer, int x, int y, int width, int height, @NotNull Text message) {
         super(x, y, width, height, message);
         this.textRenderer = textRenderer;
         this.setText(super.getMessage().getString());
     }
 
+    public void padding(int newPadding) {
+        this.padding = newPadding;
+    }
+
+    public void align(float v) {
+        this.align = v;
+    }
+
     public void setText(String text) {
+        this.original = text;
         this.text = text;
         this.updateWidth();
         this.setCaretPosition(this.text.length());
@@ -56,7 +71,7 @@ public class TextField extends ClickableWidget {
      * Writes a string at the current caret position, and then moves the caret by the length of the given string.
      */
     public void write(String str) {
-        if (this.textRenderer.getWidth(this.text + str) > super.width) return;
+        if (this.textRenderer.getWidth(this.text + str) > super.width - this.padding * 2) return;
 
         if (this.caretPosition == this.text.length()) {
             this.text += str;
@@ -66,10 +81,14 @@ public class TextField extends ClickableWidget {
             this.text = this.text.substring(0, this.caretPosition) + str + this.text.substring(this.caretPosition);
         }
 
+        this.onTextChanged();
         this.updateWidth();
         this.setCaretPosition(this.caretPosition + str.length());
     }
 
+    /**
+     * Removes an amount of characters at the current caret position either forward or backwards.
+     */
     public void remove(int amount, boolean flip) {
         amount = flip ? Math.min(this.text.length() - caretPosition, amount) : Math.min(caretPosition, amount);
 
@@ -87,20 +106,9 @@ public class TextField extends ClickableWidget {
             }
             this.setCaretPosition(this.caretPosition - amount);
         }
+
+        this.onTextChanged();
         this.updateWidth();
-    }
-
-    private void updateWidth() {
-        this.textWidth = this.textRenderer.getWidth(this.text);
-    }
-
-    private void updateCaretPosition() {
-        this.caretPositionX = this.textRenderer.getWidth(this.text.substring(0, this.caretPosition));
-    }
-
-    private void setCaretPosition(int i) {
-        this.caretPosition = i;
-        this.updateCaretPosition();
     }
 
     @Override
@@ -124,11 +132,13 @@ public class TextField extends ClickableWidget {
             return true;
         } else if (keyCode == GLFW.GLFW_KEY_ENTER) {
             super.setFocused(false);
-            this.onEnter.run();
+            this.original = this.text;
+
+            this.onPressEnter();
             return true;
         } else if (keyCode == GLFW.GLFW_KEY_ESCAPE) {
             super.setFocused(false);
-            this.setText(super.getMessage().getString());
+            this.setText(this.original);
             return true;
         } else if (keyCode == GLFW.GLFW_KEY_E) {
             return true;
@@ -191,7 +201,7 @@ public class TextField extends ClickableWidget {
 
         MatrixStack s = context.getMatrices();
         s.push();
-        s.translate(super.getX() + (super.width - this.textWidth) * align, super.getY(), 0);
+        s.translate(super.getX() + this.padding + (super.width - this.padding * 2 - this.textWidth) * align, super.getY(), 0);
 
         context.drawText(this.textRenderer, this.text, 0, 0, this.color, this.shadow);
         if (super.isFocused()) {
@@ -223,7 +233,28 @@ public class TextField extends ClickableWidget {
         builder.put(NarrationPart.TITLE, this.getNarrationMessage());
     }
 
-    public void align(float v) {
-        this.align = v;
+    protected void onTextChanged() {
+        if (this.onChangedCB != null) {
+            this.onChangedCB.accept(this.text);
+        }
+    }
+
+    protected void onPressEnter() {
+        if (this.onEnterCB != null) {
+            this.onEnterCB.accept(this.text);
+        }
+    }
+
+    private void updateWidth() {
+        this.textWidth = this.textRenderer.getWidth(this.text);
+    }
+
+    private void updateCaretPosition() {
+        this.caretPositionX = this.textRenderer.getWidth(this.text.substring(0, this.caretPosition));
+    }
+
+    private void setCaretPosition(int i) {
+        this.caretPosition = i;
+        this.updateCaretPosition();
     }
 }

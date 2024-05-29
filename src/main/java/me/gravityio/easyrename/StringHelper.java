@@ -32,7 +32,7 @@ public class StringHelper {
     /**
      * Finds the first character after a space, either forwards or backwards<br>
      * '|' is the starting index<br>
-     * e.g. for forwards: Hello| World would become Hello|<br>
+     * e.g. for forwards: Hello| World would become Hello World<br>
      * e.g. for backwards: Hello Wor|ld would become Hello|ld<br>
      */
     public static int getWord(int start, String s, boolean forward) {
@@ -40,27 +40,25 @@ public class StringHelper {
         if (forward) {
             for (int i = start; i < s.length(); i++) {
                 char c = s.charAt(i);
-                if ((c == ' ' || i == s.length() - 1) && started) {
-                    return i == s.length() - 1 ? i + 1 : i;
-                }
-                else if (c != ' ') {
+                if (c == ' ' && started) {
+                    return i;
+                } else if (c != ' ') {
                     started = true;
                 }
             }
+            return s.length();
 
         } else {
             for (int i = start - 1; i >= 0; i--) {
                 char c = s.charAt(i);
-                if ((c == ' ' || i == 0) && started) {
-                    return i == 0 ? i : i + 1;
-                }
-                else if (c != ' ') {
+                if (c == ' ' && started) {
+                    return i + 1;
+                } else if (c != ' ') {
                     started = true;
                 }
             }
-
+            return 0;
         }
-        return -1;
     }
 
 //    public static int
