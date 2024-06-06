@@ -20,7 +20,7 @@ def dependencyURLS = [
         ]
 ]
 
-def changelog = "+ Remade the text field to be my own custom one, so more control"
+def changelog = "+ I might have been accidentally spamming your logs with debug stuff"
 def mcVersions = ["1.20", "1.20.1", "1.20.2"]
 
 version = project.mod_version
