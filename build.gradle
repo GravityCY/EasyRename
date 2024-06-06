@@ -20,7 +20,7 @@ def dependencyURLS = [
         ]
 ]
 
-def changelog = "+ Remade the text field to be my own custom one, so more control"
+def changelog = "+ I might have been accidentally spamming your logs with debug stuff"
 def mcVersions = ["1.20.5", "1.20.6"]
 
 version = project.mod_version
@@ -70,7 +70,7 @@ tasks.register('publishCurseForge', net.darkhax.curseforgegradle.TaskPublishCurs
     mainFile.displayName = "Easy Rename ${mod_version}"
     mainFile.addModLoader("Fabric")
     mainFile.releaseType = "release"
-    mainFile.addJavaVersion("Java 17")
+    mainFile.addJavaVersion("Java 21")
     mainFile.addRequirement("fabric-api")
     mainFile.addRequirement("yacl")
     mainFile.addOptional("modmenu")
