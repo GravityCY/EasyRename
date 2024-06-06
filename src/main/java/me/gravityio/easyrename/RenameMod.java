@@ -5,6 +5,7 @@ import me.gravityio.easyrename.network.c2s.RenamePacket;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.text.Text;
@@ -22,7 +23,7 @@ import org.slf4j.LoggerFactory;
 public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
     public static final String MOD_ID = "renamemod";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    private static final boolean IS_DEBUG = true;
+    private static boolean IS_DEBUG = true;
 
     public static void DEBUG(String s, Object... args) {
         if (!IS_DEBUG) return;
@@ -38,6 +39,7 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
 
     @Override
     public void onInitialize() {
+        IS_DEBUG = FabricLoader.getInstance().isDevelopmentEnvironment();
         ServerPlayNetworking.registerGlobalReceiver(RenamePacket.TYPE, RenamePacket::apply);
         RenameEvents.ON_RENAME.register(this::onRename);
     }
