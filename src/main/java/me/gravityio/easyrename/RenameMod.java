@@ -6,6 +6,7 @@ import me.gravityio.easyrename.network.s2c.ScreenBlockDataPayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
+import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.decoration.ItemFrameEntity;
@@ -24,7 +25,7 @@ import org.slf4j.LoggerFactory;
 public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
     public static final String MOD_ID = "renamemod";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    private static final boolean IS_DEBUG = true;
+    private static boolean IS_DEBUG = false;
 
     public static void DEBUG(String s, Object... args) {
         if (!IS_DEBUG) return;
@@ -40,6 +41,8 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
 
     @Override
     public void onInitialize() {
+        IS_DEBUG = FabricLoader.getInstance().isDevelopmentEnvironment();
+
         PayloadTypeRegistry.playC2S().register(RenamePayload.ID, RenamePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ScreenBlockDataPayload.ID, ScreenBlockDataPayload.CODEC);
 
