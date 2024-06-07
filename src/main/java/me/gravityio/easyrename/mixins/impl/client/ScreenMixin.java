@@ -73,10 +73,13 @@ public abstract class ScreenMixin implements NameableAccessor {
     )
     private void onAfterInitDoSetup(MinecraftClient client, int width, int height, CallbackInfo ci) {
         Screen self = (Screen) (Object) this;
-        if (!(self instanceof HandledScreen<?> handled) || GlobalData.SCREEN_POS == null) return;
+        if (RenameMod.isInBlacklist(self) || GlobalData.SCREEN_POS == null) return;
 
+        HandledScreen<?> handled = (HandledScreen<?>) self;
         var screenBlock = this.client.world.getBlockEntity(GlobalData.SCREEN_POS);
         this.isNameable = screenBlock instanceof LockableContainerBlockEntity;
+        GlobalData.SCREEN_POS = null;
+
         if (!this.isNameable) return;
         RenameMod.DEBUG("[ScreenMixin] Initializing Nameable Screen with Custom Stuff");
 

@@ -8,6 +8,10 @@ import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.text.Text;
@@ -30,6 +34,10 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
     public static void DEBUG(String s, Object... args) {
         if (!IS_DEBUG) return;
         LOGGER.info(s, args);
+    }
+
+    public static boolean isInBlacklist(Screen screen) {
+        return !(screen instanceof HandledScreen<?>) || screen instanceof InventoryScreen || screen instanceof CreativeInventoryScreen;
     }
 
     @Override
