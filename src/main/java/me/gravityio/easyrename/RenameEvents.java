@@ -23,9 +23,9 @@ public class RenameEvents {
         /**
          * Called when a rename operation is performed.
          *
-         * @param world    the world in which the rename operation occurs
-         * @param pos      the position of the container being renamed
-         * @param newName  the new name for the container
+         * @param world   the world in which the rename operation occurs
+         * @param pos     the position of the container being renamed
+         * @param newName the new name for the container
          */
         void onRename(World world, BlockPos pos, Text newName);
     }

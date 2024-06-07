@@ -10,6 +10,7 @@ import net.minecraft.util.math.BlockPos;
 
 /**
  * Sent in order to let the client know the block its `HandledScreen` belongs to.
+ *
  * @param pos
  */
 public record ScreenBlockDataPayload(BlockPos pos) implements CustomPayload {

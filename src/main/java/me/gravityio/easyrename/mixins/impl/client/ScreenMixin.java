@@ -20,7 +20,9 @@ import net.minecraft.client.gui.screen.ingame.Generic3x3ContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.*;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -44,10 +46,16 @@ public abstract class ScreenMixin implements NameableAccessor {
     @Unique
     private TextFieldLabel field;
 
-    @Shadow protected abstract <T extends Element & Drawable> T addDrawableChild(T drawableElement);
-    @Shadow @Nullable protected MinecraftClient client;
-    @Shadow protected TextRenderer textRenderer;
-    @Shadow protected Text title;
+    @Shadow
+    protected abstract <T extends Element & Drawable> T addDrawableChild(T drawableElement);
+
+    @Shadow
+    @Nullable
+    protected MinecraftClient client;
+    @Shadow
+    protected TextRenderer textRenderer;
+    @Shadow
+    protected Text title;
 
     @Override
     public void easyRename$setNameable(boolean n) {

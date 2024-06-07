@@ -1,7 +1,6 @@
 package me.gravityio.easyrename.gui;
 
 import me.gravityio.easyrename.StringHelper;
-import net.minecraft.SharedConstants;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -430,7 +429,7 @@ public class TextFieldLabel extends ClickableWidget {
     }
 
     private int getBigCaret() {
-        return Math.max(this.caretIndex,this.caretEndIndex);
+        return Math.max(this.caretIndex, this.caretEndIndex);
     }
 
     private void updateRenderX() {

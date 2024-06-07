@@ -7,7 +7,6 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -17,7 +16,7 @@ import org.spongepowered.asm.mixin.injection.At;
  * a nameable container, we handled that ourselves
  */
 @Mixin(HandledScreen.class)
-public class HandledScreenMixin extends Screen  {
+public class HandledScreenMixin extends Screen {
 
     protected HandledScreenMixin(Text title) {
         super(title);

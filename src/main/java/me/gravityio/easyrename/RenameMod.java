@@ -61,7 +61,7 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
 
     /**
      * Updates the name of all nearby item frames at the given position in the world. <br><br>
-     *
+     * <p>
      * If the config option for {@link ModConfig#syncItemFrame syncItemFrames} is Enabled
      */
     private void onRename(World world, BlockPos pos, Text newName) {

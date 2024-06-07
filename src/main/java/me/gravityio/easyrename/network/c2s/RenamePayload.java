@@ -62,7 +62,7 @@ public class RenamePayload implements CustomPayload {
             RenameMod.DEBUG("Setting Both to {}", this.text.getString());
 
             var first = (LockableContainerBlockEntity) doubleInventory.first;
-            var second = (LockableContainerBlockEntity)doubleInventory.second;
+            var second = (LockableContainerBlockEntity) doubleInventory.second;
             first.customName = (this.text);
             second.customName = (this.text);
             first.markDirty();

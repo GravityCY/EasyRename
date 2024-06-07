@@ -24,7 +24,9 @@ import java.util.OptionalInt;
  */
 @Mixin(ServerPlayerEntity.class)
 public abstract class ServerPlayerEntityMixin {
-    @Shadow public ServerPlayNetworkHandler networkHandler;
+    @Shadow
+    public ServerPlayNetworkHandler networkHandler;
+
     @Inject(
             method = "openHandledScreen",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerPlayNetworkHandler;sendPacket(Lnet/minecraft/network/packet/Packet;)V"),
