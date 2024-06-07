@@ -3,10 +3,13 @@ package me.gravityio.easyrename;
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import me.gravityio.easyrename.network.c2s.RenamePacket;
 import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.loader.api.FabricLoader;
 import net.fabricmc.loader.api.entrypoint.PreLaunchEntrypoint;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.CreativeInventoryScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.entity.decoration.ItemFrameEntity;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
@@ -30,6 +33,10 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
         LOGGER.info(s, args);
     }
 
+    public static boolean isInBlacklist(Screen screen) {
+        return !(screen instanceof HandledScreen<?>) || screen instanceof InventoryScreen || screen instanceof CreativeInventoryScreen;
+    }
+
     @Override
     public void onPreLaunch() {
         MixinExtrasBootstrap.init();
@@ -47,7 +54,7 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
 
     /**
      * Updates the name of all nearby item frames at the given position in the world. <br><br>
-     *
+     * <p>
      * If the config option for {@link ModConfig#syncItemFrame syncItemFrames} is Enabled
      */
     private void onRename(World world, BlockPos pos, Text newName) {
