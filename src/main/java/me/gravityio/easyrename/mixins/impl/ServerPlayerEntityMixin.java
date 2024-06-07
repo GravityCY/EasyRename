@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 public abstract class ServerPlayerEntityMixin {
     @Unique
     private ScreenHandler newOne;
+
     @Redirect(
             method = "openHandledScreen",
             at = @At(value = "NEW", target = "(ILnet/minecraft/screen/ScreenHandlerType;Lnet/minecraft/text/Text;)Lnet/minecraft/network/packet/s2c/play/OpenScreenS2CPacket;")
@@ -46,7 +47,7 @@ public abstract class ServerPlayerEntityMixin {
         }
 
         RenameMod.DEBUG("[ServerPlayerEntityMixin] Adding Custom Data of pos: {}", pos);
-        ((BlockPosAccessor)packet).easyRename$setBlockPos(pos);
+        ((BlockPosAccessor) packet).easyRename$setBlockPos(pos);
         this.newOne = null;
         return packet;
     }

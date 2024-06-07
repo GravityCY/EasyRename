@@ -29,9 +29,10 @@ public class ModConfig {
 
     public static ModConfig INSTANCE;
 
+
     /**
      * Whether to also rename item frames nearby a container when it is renamed. <br><br>
-     *
+     * <p>
      * Useful for use with the <a href="https://modrinth.com/mod/inventory-tabs-updated">Inventory Tabs</a> mod
      */
     @SerialEntry

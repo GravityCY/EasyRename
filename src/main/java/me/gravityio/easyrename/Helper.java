@@ -13,9 +13,9 @@ public class Helper {
     /**
      * Checks if a block at the given position in the world is a double chest.
      *
-     * @param  world    the world in which the block is located
-     * @param  blockPos the position of the block
-     * @return          true if the block is a double chest, false otherwise
+     * @param world    the world in which the block is located
+     * @param blockPos the position of the block
+     * @return true if the block is a double chest, false otherwise
      */
     public static boolean isDouble(World world, BlockPos blockPos) {
         BlockState blockState = world.getBlockState(blockPos);
@@ -29,9 +29,9 @@ public class Helper {
     /**
      * Gets the direction of the other chest of a double chest relative to the given pos
      *
-     * @param  world  the world in which the chest is located
-     * @param  pos    the position of the chest in the world
-     * @return        the direction of the other chest relative to the given position
+     * @param world the world in which the chest is located
+     * @param pos   the position of the chest in the world
+     * @return the direction of the other chest relative to the given position
      */
     public static Direction getChestDirection(World world, BlockPos pos) {
         BlockState state = world.getBlockState(pos);

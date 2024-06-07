@@ -14,7 +14,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 /**
  * Adds some extra data to the OpenScreenS2CPacket in order to let
  * the client know what is a renameable container <br><br>
- *
+ * <p>
  * The client doesn't know what block its currently opened screen belongs to,
  * so from what I can see there's no reliable way to tell the client whether its screen should be renameable
  */
