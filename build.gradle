@@ -20,7 +20,7 @@ def dependencyURLS = [
         ]
 ]
 
-def changelog = "+ I might have been accidentally spamming your logs with debug stuff"
+def changelog = "+ Fixed an potential issue with non inventory blocks."
 def mcVersions = ["1.20.3", "1.20.4"]
 
 version = project.mod_version
