@@ -38,12 +38,12 @@ public class OpenScreenPacketMixin implements BlockPosAccessor {
     private void onSend(PacketByteBuf buf, CallbackInfo ci) {
         this.pos = this.pos == null ? BlockPos.ORIGIN : this.pos;
         RenameMod.DEBUG("[OpenScreenPacketMixin] Sending OpenScreenPacket of pos: {}", this.pos);
-        buf.writeBlockPos(this.pos);
+        buf.writeNullable(this.pos, PacketByteBuf::writeBlockPos);
     }
 
     @Inject(method = "<init>(Lnet/minecraft/network/PacketByteBuf;)V", at = @At("TAIL"))
     private void onReceive(PacketByteBuf buf, CallbackInfo ci) {
-        this.pos = buf.readBlockPos();
+        this.pos = buf.readNullable(PacketByteBuf::readBlockPos);
         RenameMod.DEBUG("[OpenScreenPacketMixin] Receiving OpenScreenPacket of pos: {}", this.pos);
     }
 
