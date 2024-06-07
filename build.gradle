@@ -63,6 +63,7 @@ tasks.register('publishCurseForge', net.darkhax.curseforgegradle.TaskPublishCurs
     apiToken = System.getenv("CURSEFORGE_UPLOAD");
 
     def mainFile = upload(1027188, remapJar)
+    mainFile.addEnvironment("Client", "Server");
     mainFile.changelog = changelog
     mcVersions.each {
         mainFile.addGameVersion(it)
