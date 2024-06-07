@@ -36,7 +36,6 @@ public class OpenScreenPacketMixin implements BlockPosAccessor {
 
     @Inject(method = "write", at = @At("TAIL"))
     private void onSend(PacketByteBuf buf, CallbackInfo ci) {
-        this.pos = this.pos == null ? BlockPos.ORIGIN : this.pos;
         RenameMod.DEBUG("[OpenScreenPacketMixin] Sending OpenScreenPacket of pos: {}", this.pos);
         buf.writeNullable(this.pos, PacketByteBuf::writeBlockPos);
     }
@@ -46,6 +45,5 @@ public class OpenScreenPacketMixin implements BlockPosAccessor {
         this.pos = buf.readNullable(PacketByteBuf::readBlockPos);
         RenameMod.DEBUG("[OpenScreenPacketMixin] Receiving OpenScreenPacket of pos: {}", this.pos);
     }
-
 
 }
