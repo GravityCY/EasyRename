@@ -42,8 +42,6 @@ public abstract class ServerPlayerEntityMixin {
             } else if (dInv.second instanceof LockableContainerBlockEntity entity) {
                 pos = entity.getPos();
             }
-        } else {
-            return;
         }
 
         ServerPlayNetworking.send(this.networkHandler.player, new ScreenBlockDataPayload(pos));

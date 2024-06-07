@@ -77,7 +77,6 @@ public abstract class ScreenMixin implements NameableAccessor {
 
         var screenBlock = this.client.world.getBlockEntity(GlobalData.SCREEN_POS);
         this.isNameable = screenBlock instanceof LockableContainerBlockEntity;
-        GlobalData.SCREEN_POS = null;
         if (!this.isNameable) return;
         RenameMod.DEBUG("[ScreenMixin] Initializing Nameable Screen with Custom Stuff");
 
