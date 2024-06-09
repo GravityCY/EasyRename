@@ -6,21 +6,6 @@ plugins {
     id 'me.gravityio.replacementplugin' version "0.0.7"
 }
 
-def dependencyURLS = [
-        modrinth: [
-                yacl: "https://modrinth.com/mod/yacl",
-                fabric: "https://modrinth.com/mod/fabric-api",
-                modmenu: "https://modrinth.com/mod/modmenu",
-                inventory_tabs: "https://modrinth.com/mod/inventory-tabs"
-        ],
-        curseforge: [
-                yacl: "https://www.curseforge.com/minecraft/mc-mods/yacl",
-                fabric: "https://www.curseforge.com/minecraft/mc-mods/fabric-api",
-                modmenu: "https://www.curseforge.com/minecraft/mc-mods/modmenu",
-                inventory_tabs: "https://www.curseforge.com/minecraft/mc-mods/inventory-tabs-updated"
-        ]
-]
-
 replacement {
     fileName = "README.md"
     types = ["modrinth", "curseforge"]

@@ -4,7 +4,7 @@ Easily Rename your Containers, just click on the title, type whatever you want, 
 **Requires <a href="${yacl}" target="_blank">YACL</a>, <a href="${fabric}" target="_blank">Fabric API</a>**\
 **Suggested to use <a href="${modmenu}" target="_blank">Mod Menu</a>.**\
 **Need on Client: ✅, Need on Server: ✅**\
-**Report any Issues on [GitHub](https://github.com/GravityCY/QuickStore/issues) or my [Discord Server](https://discord.gg/Ef4Z22gnqj)**
+**Report any Issues on [GitHub](https://github.com/GravityCY/EasyRename/issues) or my [Discord Server](https://discord.gg/Ww5nUMQF4g)**
 
 
 ![JIF](https://i.ibb.co/Wsx9XFv/java-EKe-VVSoi8-B.gif)
