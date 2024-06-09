@@ -3,6 +3,7 @@ plugins {
     id "maven-publish"
     id "com.modrinth.minotaur" version "2.+"
     id 'net.darkhax.curseforgegradle' version "1.1.24"
+    id 'me.gravityio.replacementplugin' version "0.0.7"
 }
 
 def dependencyURLS = [
@@ -19,6 +20,17 @@ def dependencyURLS = [
                 inventory_tabs: "https://www.curseforge.com/minecraft/mc-mods/inventory-tabs-updated"
         ]
 ]
+
+replacement {
+    fileName = "README.md"
+    types = ["modrinth", "curseforge"]
+    values = [
+            "fabric": ["https://modrinth.com/mod/fabric-api", "https://curseforge.com/minecraft/mc-mods/fabric-api"],
+            "yacl": ["https://modrinth.com/mod/yacl", "https://curseforge.com/minecraft/mc-mods/yacl"],
+            "modmenu": ["https://modrinth.com/mod/modmenu", "https://curseforge.com/minecraft/mc-mods/modmenu"],
+            "inventory_tabs": ["https://modrinth.com/mod/inventory-tabs", "https://www.curseforge.com/minecraft/mc-mods/inventory-tabs-updated"]
+    ]
+}
 
 def changelog = "+ Fixed a bug where text showed in the player inventory screen in survival and creative."
 def mcVersions = ["1.20.5", "1.20.6"]
@@ -38,15 +50,6 @@ def replace(String input, String name, Map<String, Map<String, String>> names) {
 
 loom {
     accessWidenerPath = file("src/main/resources/easyrename.accesswidener")
-}
-
-tasks.register("readme") {
-    group = "documentation"
-
-    def input = file("README.md")
-    def inputText = input.getText("UTF-8")
-    replace(inputText, "curseforge", dependencyURLS)
-    replace(inputText, "modrinth", dependencyURLS)
 }
 
 tasks.register("publishMod") {
