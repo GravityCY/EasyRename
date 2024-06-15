@@ -6,9 +6,31 @@ import net.minecraft.block.enums.ChestType;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class Helper {
+
+    public static int lerp(int argb, int toargb, float delta, boolean alpha) {
+        int a = (argb & 0xFF000000) >> 24;
+        int r = (argb & 0xFF0000) >> 16;
+        int g = (argb & 0xFF00) >> 8;
+        int b = argb & 0xFF;
+
+        int ta = (toargb & 0xFF000000) >> 24;
+        int tr = (toargb & 0xFF0000) >> 16;
+        int tg = (toargb & 0xFF00) >> 8;
+        int tb = toargb & 0xFF;
+
+        if (alpha) {
+            a = MathHelper.lerp(delta, a, ta) << 24;
+        }
+        r = MathHelper.lerp(delta, r, tr) << 16;
+        g = MathHelper.lerp(delta, g, tg) << 8;
+        b = MathHelper.lerp(delta, b, tb);
+
+        return a | r | g | b;
+    }
 
     /**
      * Checks if a block at the given position in the world is a double chest.

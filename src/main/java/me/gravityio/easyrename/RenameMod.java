@@ -2,6 +2,7 @@ package me.gravityio.easyrename;
 
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
 import me.gravityio.easyrename.network.c2s.RenamePayload;
+import me.gravityio.easyrename.network.s2c.RenameResponsePayload;
 import me.gravityio.easyrename.network.s2c.ScreenBlockDataPayload;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
@@ -14,7 +15,12 @@ import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.entity.decoration.ItemFrameEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.registry.Registries;
+import net.minecraft.registry.Registry;
+import net.minecraft.sound.SoundEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 import net.minecraft.util.math.Direction;
@@ -27,10 +33,15 @@ import org.slf4j.LoggerFactory;
  * A Fabric Mod to make containers renameable
  */
 public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
-    public static final String MOD_ID = "renamemod";
+    public static final String MOD_ID = "easyrename";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    private static final Identifier RENAME_DENY_ID = id("ui.rename.fail");
+    public static final SoundEvent RENAME_DENY = SoundEvent.of(RENAME_DENY_ID);
     private static boolean IS_DEBUG = false;
 
+    public static Identifier id(String str) {
+        return Identifier.of(MOD_ID, str);
+    }
     public static void DEBUG(String s, Object... args) {
         if (!IS_DEBUG) return;
         LOGGER.info(s, args);
@@ -51,7 +62,10 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
     public void onInitialize() {
         IS_DEBUG = FabricLoader.getInstance().isDevelopmentEnvironment();
 
+        Registry.register(Registries.SOUND_EVENT, RENAME_DENY_ID, RENAME_DENY);
+
         PayloadTypeRegistry.playC2S().register(RenamePayload.ID, RenamePayload.CODEC);
+        PayloadTypeRegistry.playS2C().register(RenameResponsePayload.ID,RenameResponsePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ScreenBlockDataPayload.ID, ScreenBlockDataPayload.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(RenamePayload.ID, (payload, context) -> payload.apply(context.player(), context.responseSender()));
@@ -64,8 +78,33 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
      * <p>
      * If the config option for {@link ModConfig#syncItemFrame syncItemFrames} is Enabled
      */
-    private void onRename(World world, BlockPos pos, Text newName) {
-        if (world.isClient || !ModConfig.INSTANCE.syncItemFrame) return;
+    private boolean onRename(RenameEvents.RenameData data) {
+        var state = data.world().getBlockState(data.pos());
+        DEBUG("Changed name of container '{}', from '{}' to '{}'", state.getBlock().getName().getString(), data.oldName().getString(), data.newName().getString());
+
+        this.doRenameItemFrame(data);
+        return this.doUseXP(data);
+    }
+
+    private boolean doUseXP(RenameEvents.RenameData data) {
+        if (!ModConfig.INSTANCE.useXP) return true;
+        PlayerEntity player = data.player();
+        if (player.experienceLevel < 5) {
+            DEBUG("Player '{}' did not have enough xp to rename", player.getName());
+            return false;
+        }
+        player.addExperience(-ModConfig.INSTANCE.xpCost);
+        return true;
+    }
+
+    private void doRenameItemFrame(RenameEvents.RenameData data) {
+        if (!ModConfig.INSTANCE.syncItemFrame) return;
+
+        World world = data.world();
+        BlockPos pos = data.pos();
+        Text newName = data.newName();
+
+        if (world.isClient) return;
 
         Vec3d lookPos = pos.toCenterPos();
         var ox = 1.1;

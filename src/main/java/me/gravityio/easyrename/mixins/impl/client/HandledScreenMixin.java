@@ -2,7 +2,7 @@ package me.gravityio.easyrename.mixins.impl.client;
 
 
 import com.llamalad7.mixinextras.injector.WrapWithCondition;
-import me.gravityio.easyrename.mixins.inter.INameable;
+import me.gravityio.easyrename.mixins.inter.INameableScreen;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -29,7 +29,7 @@ public class HandledScreenMixin extends Screen {
                     target = "Lnet/minecraft/client/gui/DrawContext;drawText(Lnet/minecraft/client/font/TextRenderer;Lnet/minecraft/text/Text;IIIZ)I", ordinal = 0)
     )
     private boolean drawTitleIf(DrawContext instance, TextRenderer textRenderer, Text text, int x, int y, int color, boolean shadow) {
-        INameable accessor = (INameable) this;
+        INameableScreen accessor = (INameableScreen) this;
         return !accessor.easyRename$isNameable();
     }
 }

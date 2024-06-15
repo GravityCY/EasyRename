@@ -1,5 +1,9 @@
 {
-  "yacl.renamemod.title": "Easy Rename",
-  "yacl.renamemod.syncItemFrame.label": "Rename Item Frame",
-  "yacl.renamemod.syncItemFrame.description": "Whether to rename nearby item frames when renaming a container.\n\nUseful when used with the Item Frame Name functionality of the InventoryTabs mod."
+  "yacl.easyrename.title": "Easy Rename",
+  "yacl.easyrename.syncItemFrame.label": "Rename Item Frame",
+  "yacl.easyrename.syncItemFrame.description": "Whether to rename nearby item frames when renaming a container.\n\nUseful when used with the Item Frame Name functionality of the InventoryTabs mod.",
+  "yacl.easyrename.useXP.label": "Use XP",
+  "yacl.easyrename.useXP.description": "Whether to use XP when renaming a container.",
+  "yacl.easyrename.xpCost.label": "XP Cost",
+  "yacl.easyrename.xpCost.description": "How much XP to use when renaming a container."
 }

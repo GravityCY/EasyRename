@@ -1,0 +1,7 @@
+{
+  "ui.rename.fail": {
+    "sounds": [
+      "easyrename:rename_deny"
+    ]
+  }
+}

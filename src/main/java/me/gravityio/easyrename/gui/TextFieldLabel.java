@@ -29,11 +29,11 @@ public class TextFieldLabel extends ClickableWidget {
 
     protected String original;
     protected final TextRenderer textRenderer;
-    protected int color = 0x404040;
+    protected int color = 0xFF_404040;
     protected boolean shadow;
     protected int caretIndex;
     protected int caretEndIndex;
-    protected int caretColor = 0xffffffff;
+    protected int caretColor = 0xFF_FFFFFF;
     protected float align = 0;
     protected int caretPosition = 0;
     protected int caretEndPosition = 0;
@@ -42,6 +42,14 @@ public class TextFieldLabel extends ClickableWidget {
     protected boolean doRenderCaret;
     protected int padding = 0;
     protected int renderX;
+
+    public int getColor() {
+        return color;
+    }
+
+    public void setColor(int color) {
+        this.color = color;
+    }
 
     /**
      * Removes

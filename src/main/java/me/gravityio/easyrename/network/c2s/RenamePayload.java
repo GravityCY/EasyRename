@@ -4,7 +4,9 @@ import me.gravityio.easyrename.RenameEvents;
 import me.gravityio.easyrename.RenameMod;
 import me.gravityio.easyrename.mixins.accessors.DoubleInventoryAccessor;
 import me.gravityio.easyrename.mixins.accessors.LockableContainerBlockEntityAccessor;
+import me.gravityio.easyrename.network.s2c.RenameResponsePayload;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.inventory.DoubleInventory;
 import net.minecraft.network.PacketByteBuf;
@@ -16,6 +18,8 @@ import net.minecraft.text.TextCodecs;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+
+import static me.gravityio.easyrename.RenameMod.DEBUG;
 
 /**
  * A Packet sent from the client to the server that renames the currently opened container.
@@ -59,32 +63,45 @@ public class RenamePayload implements CustomPayload {
 
         World world;
         BlockPos pos;
+        Text previous;
+        Runnable run;
 
         if (inv instanceof DoubleInventoryAccessor doubleInventory) {
-            RenameMod.DEBUG("[RenamePacket] Applying as a DoubleInventory");
-            RenameMod.DEBUG("Setting Both to {}", this.text.getString());
+            DEBUG("[RenamePacket] Applying as a DoubleInventory");
+            DEBUG("Setting Both to {}", this.text.getString());
 
             var first = (LockableContainerBlockEntity) doubleInventory.getFirst();
             var second = (LockableContainerBlockEntity) doubleInventory.getSecond();
             var firstAccess = (LockableContainerBlockEntityAccessor) first;
             var secondAccess = (LockableContainerBlockEntityAccessor) second;
-            firstAccess.setCustomName(this.text);
-            secondAccess.setCustomName(this.text);
-            first.markDirty();
-            second.markDirty();
             world = first.getWorld();
             pos = first.getPos();
+            previous = first.getCustomName();
+            run = () -> {
+                firstAccess.setCustomName(this.text);
+                secondAccess.setCustomName(this.text);
+                first.markDirty();
+                second.markDirty();
+            };
         } else {
-            RenameMod.DEBUG("[RenamePacket] Applying as a LockableContainerBlockEntity");
-            RenameMod.DEBUG("[RenamePacket] Setting Container to '{}'", this.text.getString());
-
+            DEBUG("[RenamePacket] Applying as a LockableContainerBlockEntity");
+            DEBUG("[RenamePacket] Setting Container to '{}'", this.text.getString());
             var lockable = (LockableContainerBlockEntity) inv;
             var lockableAccess = (LockableContainerBlockEntityAccessor) inv;
-            lockableAccess.setCustomName(this.text);
-            lockable.markDirty();
             world = lockable.getWorld();
+            previous = lockable.getCustomName();
             pos = lockable.getPos();
+            run = () -> {
+                lockableAccess.setCustomName(this.text);
+                lockable.markDirty();
+            };
         }
-        RenameEvents.ON_RENAME.invoker().onRename(world, pos, this.text);
+
+        var data = new RenameEvents.RenameData(serverPlayerEntity, world, pos, previous, this.text);
+        var success = RenameEvents.ON_RENAME.invoker().onRename(data);
+        if (success)
+            run.run();
+        DEBUG("Sending rename response of '{}'", success);
+        ServerPlayNetworking.send(serverPlayerEntity, new RenameResponsePayload(success));
     }
 }
