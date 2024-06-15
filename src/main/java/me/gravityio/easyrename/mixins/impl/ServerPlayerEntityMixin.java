@@ -5,6 +5,7 @@ import me.gravityio.easyrename.network.s2c.ScreenBlockDataPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.inventory.DoubleInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.server.network.ServerPlayNetworkHandler;
@@ -33,8 +34,11 @@ public abstract class ServerPlayerEntityMixin {
             locals = LocalCapture.CAPTURE_FAILEXCEPTION
     )
     private void addCustomData(NamedScreenHandlerFactory factory, CallbackInfoReturnable<OptionalInt> cir, ScreenHandler screenHandler) {
-        var inv = screenHandler.slots.get(0).inventory;
+        Inventory inv = null;
         BlockPos pos = null;
+        if (!screenHandler.slots.isEmpty() && screenHandler.slots.getFirst().inventory != null) {
+            inv = screenHandler.slots.getFirst().inventory;
+        }
 
         if (inv instanceof LockableContainerBlockEntity entity) {
             pos = entity.getPos();
