@@ -36,7 +36,7 @@ public abstract class ServerPlayerEntityMixin {
     private void addCustomData(NamedScreenHandlerFactory factory, CallbackInfoReturnable<OptionalInt> cir, ScreenHandler screenHandler) {
         Inventory inv = null;
         BlockPos pos = null;
-        if (!screenHandler.slots.isEmpty() && screenHandler.slots.getFirst().inventory != null) {
+        if (!screenHandler.slots.isEmpty()) {
             inv = screenHandler.slots.getFirst().inventory;
         }
 
