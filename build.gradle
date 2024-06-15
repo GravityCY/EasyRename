@@ -20,7 +20,7 @@ def dependencyURLS = [
         ]
 ]
 
-def changelog = "- Fixed a bug with mods that add special custom screens."
+def changelog = "- Fixed a bug with some mods adding special screens"
 def mcVersions = ["1.20.3", "1.20.4"]
 
 version = project.mod_version
