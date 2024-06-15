@@ -2,6 +2,8 @@ package me.gravityio.easyrename.network.c2s;
 
 import me.gravityio.easyrename.RenameEvents;
 import me.gravityio.easyrename.RenameMod;
+import me.gravityio.easyrename.mixins.accessors.DoubleInventoryAccessor;
+import me.gravityio.easyrename.mixins.accessors.LockableContainerBlockEntityAccessor;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.inventory.DoubleInventory;
@@ -48,23 +50,26 @@ public class RenamePayload implements CustomPayload {
      * If it is a lockable block entity, it renames it.
      */
     public void apply(ServerPlayerEntity serverPlayerEntity, PacketSender packetSender) {
-        var inv = serverPlayerEntity.currentScreenHandler.slots.get(0).inventory;
+        if (serverPlayerEntity.currentScreenHandler == null) return;
+        if (serverPlayerEntity.currentScreenHandler.slots.isEmpty()) return;
+        var inv = serverPlayerEntity.currentScreenHandler.slots.getFirst().inventory;
 
         boolean isValid = inv instanceof DoubleInventory || inv instanceof LockableContainerBlockEntity;
-
         if (!isValid) return;
 
         World world;
         BlockPos pos;
 
-        if (inv instanceof DoubleInventory doubleInventory) {
+        if (inv instanceof DoubleInventoryAccessor doubleInventory) {
             RenameMod.DEBUG("[RenamePacket] Applying as a DoubleInventory");
             RenameMod.DEBUG("Setting Both to {}", this.text.getString());
 
-            var first = (LockableContainerBlockEntity) doubleInventory.first;
-            var second = (LockableContainerBlockEntity) doubleInventory.second;
-            first.customName = (this.text);
-            second.customName = (this.text);
+            var first = (LockableContainerBlockEntity) doubleInventory.getFirst();
+            var second = (LockableContainerBlockEntity) doubleInventory.getSecond();
+            var firstAccess = (LockableContainerBlockEntityAccessor) first;
+            var secondAccess = (LockableContainerBlockEntityAccessor) second;
+            firstAccess.setCustomName(this.text);
+            secondAccess.setCustomName(this.text);
             first.markDirty();
             second.markDirty();
             world = first.getWorld();
@@ -73,8 +78,9 @@ public class RenamePayload implements CustomPayload {
             RenameMod.DEBUG("[RenamePacket] Applying as a LockableContainerBlockEntity");
             RenameMod.DEBUG("[RenamePacket] Setting Container to '{}'", this.text.getString());
 
-            LockableContainerBlockEntity lockable = (LockableContainerBlockEntity) inv;
-            lockable.customName = (this.text);
+            var lockable = (LockableContainerBlockEntity) inv;
+            var lockableAccess = (LockableContainerBlockEntityAccessor) inv;
+            lockableAccess.setCustomName(this.text);
             lockable.markDirty();
             world = lockable.getWorld();
             pos = lockable.getPos();

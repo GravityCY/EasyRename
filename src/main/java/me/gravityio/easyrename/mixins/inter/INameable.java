@@ -1,6 +1,6 @@
 package me.gravityio.easyrename.mixins.inter;
 
-public interface NameableAccessor {
+public interface INameable {
     void easyRename$setNameable(boolean n);
 
     boolean easyRename$isNameable();

@@ -23,10 +23,6 @@ def mcVersions = ["1.21"]
 version = project.mod_version
 group = "me.gravityio"
 
-loom {
-    accessWidenerPath = file("src/main/resources/easyrename.accesswidener")
-}
-
 tasks.register("publishMod") {
     group = "publishing"
 

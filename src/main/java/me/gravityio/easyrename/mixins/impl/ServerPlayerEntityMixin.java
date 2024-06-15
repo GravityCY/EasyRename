@@ -1,10 +1,10 @@
 package me.gravityio.easyrename.mixins.impl;
 
 import me.gravityio.easyrename.RenameMod;
+import me.gravityio.easyrename.mixins.accessors.DoubleInventoryAccessor;
 import me.gravityio.easyrename.network.s2c.ScreenBlockDataPayload;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
-import net.minecraft.inventory.DoubleInventory;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.screen.NamedScreenHandlerFactory;
 import net.minecraft.screen.ScreenHandler;
@@ -42,10 +42,10 @@ public abstract class ServerPlayerEntityMixin {
 
         if (inv instanceof LockableContainerBlockEntity entity) {
             pos = entity.getPos();
-        } else if (inv instanceof DoubleInventory dInv) {
-            if (dInv.first instanceof LockableContainerBlockEntity entity) {
+        } else if (inv instanceof DoubleInventoryAccessor dInv) {
+            if (dInv.getFirst() instanceof LockableContainerBlockEntity entity) {
                 pos = entity.getPos();
-            } else if (dInv.second instanceof LockableContainerBlockEntity entity) {
+            } else if (dInv.getSecond() instanceof LockableContainerBlockEntity entity) {
                 pos = entity.getPos();
             }
         }

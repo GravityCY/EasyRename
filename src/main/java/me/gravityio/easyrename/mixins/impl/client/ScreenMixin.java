@@ -4,10 +4,11 @@ import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import me.gravityio.easyrename.GlobalData;
 import me.gravityio.easyrename.RenameMod;
 import me.gravityio.easyrename.gui.TextFieldLabel;
-import me.gravityio.easyrename.mixins.inter.NameableAccessor;
+import me.gravityio.easyrename.mixins.accessors.HandledScreenAccessor;
+import me.gravityio.easyrename.mixins.accessors.LockableContainerBlockEntityAccessor;
+import me.gravityio.easyrename.mixins.inter.INameable;
 import me.gravityio.easyrename.network.c2s.RenamePayload;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
@@ -20,9 +21,7 @@ import net.minecraft.client.gui.screen.ingame.Generic3x3ContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -40,7 +39,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  * </ul>
  */
 @Mixin(Screen.class)
-public abstract class ScreenMixin implements NameableAccessor {
+public abstract class ScreenMixin implements INameable {
     @Unique
     private boolean isNameable;
     @Unique
@@ -54,6 +53,8 @@ public abstract class ScreenMixin implements NameableAccessor {
     protected MinecraftClient client;
     @Shadow
     protected TextRenderer textRenderer;
+    @Mutable
+    @Final
     @Shadow
     protected Text title;
 
@@ -83,18 +84,18 @@ public abstract class ScreenMixin implements NameableAccessor {
         Screen self = (Screen) (Object) this;
         if (RenameMod.isInBlacklist(self) || GlobalData.SCREEN_POS == null) return;
 
-        HandledScreen<?> handled = (HandledScreen<?>) self;
+        HandledScreenAccessor handled = (HandledScreenAccessor) self;
         var screenBlock = this.client.world.getBlockEntity(GlobalData.SCREEN_POS);
-        this.isNameable = screenBlock instanceof LockableContainerBlockEntity;
+        this.isNameable = screenBlock instanceof LockableContainerBlockEntityAccessor;
         GlobalData.SCREEN_POS = null;
 
         if (!this.isNameable) return;
         RenameMod.DEBUG("[ScreenMixin] Initializing Nameable Screen with Custom Stuff");
 
-        var renameBlock = (LockableContainerBlockEntity) screenBlock;
-        var x = handled.x;
-        var y = handled.y + 6;
-        this.field = new TextFieldLabel(this.textRenderer, x, y, handled.backgroundWidth, this.textRenderer.fontHeight, this.title);
+        var renameBlock = (LockableContainerBlockEntityAccessor) screenBlock;
+        var x = handled.getX();
+        var y = handled.getY() + 6;
+        this.field = new TextFieldLabel(this.textRenderer, x, y, handled.getBackgroundWidth(), this.textRenderer.fontHeight, this.title);
         this.field.padding(8);
         if (handled instanceof AbstractFurnaceScreen<?> || handled instanceof BrewingStandScreen || handled instanceof Generic3x3ContainerScreen) {
             this.field.align(0.5f);
@@ -102,7 +103,8 @@ public abstract class ScreenMixin implements NameableAccessor {
 
         this.field.onEnterCB = (str) -> {
             var text = Text.literal(str);
-            renameBlock.customName = text;
+            this.title = text;
+            renameBlock.setCustomName(text);
             ClientPlayNetworking.send(new RenamePayload(text));
         };
 
@@ -110,14 +112,14 @@ public abstract class ScreenMixin implements NameableAccessor {
     }
 
     /**
-     * We re-evauluate every frame, because we can't control any side effects in regard to the screen ever changing.<br>
+     * We re-evauluate every frame, because we can't control any side effects in regard to the screen ever-changing.<br>
      * Prime example is the furnace with the recipe book, as soon as the recipe book shifts the whole UI, our text is just hanging
      */
     @Inject(method = "render", at = @At("HEAD"))
     private void onRender(DrawContext context, int mouseX, int mouseY, float delta, CallbackInfo ci) {
         GlobalData.IS_TYPING = false;
         Screen self = (Screen) (Object) this;
-        if (!(self instanceof HandledScreen<?> handled) || !this.isNameable) return;
+        if (!(self instanceof HandledScreenAccessor handled) || !this.isNameable) return;
         GlobalData.IS_TYPING = this.field.isFocused();
         this.reval(handled);
     }
@@ -129,17 +131,17 @@ public abstract class ScreenMixin implements NameableAccessor {
     @Inject(method = "clearAndInit", at = @At("TAIL"))
     private void onClearDoSetup(CallbackInfo ci) {
         Screen self = (Screen) (Object) this;
-        if (!(self instanceof HandledScreen<?> handled) || !this.isNameable) return;
+        if (!(self instanceof HandledScreenAccessor handled) || !this.isNameable) return;
         this.reval(handled);
         this.addDrawableChild(this.field);
     }
 
     @Unique
-    private void reval(HandledScreen<?> handled) {
-        var x = handled.x;
-        var y = handled.y + 6;
+    private void reval(HandledScreenAccessor handled) {
+        var x = handled.getX();
+        var y = handled.getY() + 6;
 
-        this.field.setWidth(handled.backgroundWidth);
+        this.field.setWidth(handled.getBackgroundWidth());
 
         this.field.setX(x);
         this.field.setY(y);

@@ -20,7 +20,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
- * My own custom text field widget
+ * Pretty much just some simple rendered text that is also clickable and then editable.
  */
 public class TextFieldLabel extends ClickableWidget {
     public Consumer<String> onEnterCB;

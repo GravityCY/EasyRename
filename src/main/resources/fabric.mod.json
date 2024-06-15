@@ -16,7 +16,6 @@
   "license": "${mod_license}",
   "icon": "assets/easyrename/icon.png",
   "environment": "*",
-  "accessWidener": "easyrename.accesswidener",
   "entrypoints": {
     "client": [
       "me.gravityio.easyrename.client.RenameModClient"
@@ -32,7 +31,8 @@
     ]
   },
   "mixins": [
-    "easyrename.mixins.json"
+    "easyrename.mixins.json",
+    "accessors.mixins.json"
   ],
   "depends": {
     "fabricloader": ">=${loader_version}",
