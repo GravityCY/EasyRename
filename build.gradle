@@ -17,7 +17,7 @@ replacement {
     ]
 }
 
-def changelog = "- Update to 1.21!"
+def changelog = "- Fixed a bug with some mods adding special screens"
 def mcVersions = ["1.21"]
 
 version = project.mod_version
