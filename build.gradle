@@ -20,7 +20,7 @@ def dependencyURLS = [
         ]
 ]
 
-def changelog = "+ Fixed a bug where text showed in the player inventory screen in survival and creative."
+def changelog = "- Fixed a bug with mods that add special custom screens."
 def mcVersions = ["1.20.3", "1.20.4"]
 
 version = project.mod_version
