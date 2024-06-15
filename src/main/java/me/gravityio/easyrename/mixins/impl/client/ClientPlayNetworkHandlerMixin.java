@@ -19,8 +19,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
  */
 @Mixin(ClientPlayNetworkHandler.class)
 public class ClientPlayNetworkHandlerMixin {
-    @Shadow @Final private MinecraftClient client;
-
     @Inject(method = "onOpenScreen", at = @At(value = "INVOKE", target = "Lnet/minecraft/network/packet/s2c/play/OpenScreenS2CPacket;getScreenHandlerType()Lnet/minecraft/screen/ScreenHandlerType;"))
     private void setNameableScreen(OpenScreenS2CPacket packet, CallbackInfo ci) {
         GlobalData.SCREEN_POS = ((BlockPosAccessor) packet).easyRename$getBlockPos();
