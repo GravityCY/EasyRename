@@ -63,7 +63,7 @@ public class RenamePacket implements FabricPacket {
             RenameMod.DEBUG("Setting Both to {}", this.text.getString());
 
             var first = (LockableContainerBlockEntity) doubleInventory.first;
-            var second = (LockableContainerBlockEntity)doubleInventory.second;
+            var second = (LockableContainerBlockEntity) doubleInventory.second;
             first.setCustomName(this.text);
             second.setCustomName(this.text);
             first.markDirty();

@@ -430,7 +430,7 @@ public class TextFieldLabel extends ClickableWidget {
     }
 
     private int getBigCaret() {
-        return Math.max(this.caretIndex,this.caretEndIndex);
+        return Math.max(this.caretIndex, this.caretEndIndex);
     }
 
     private void updateRenderX() {

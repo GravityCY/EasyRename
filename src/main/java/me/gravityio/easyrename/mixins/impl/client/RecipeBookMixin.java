@@ -14,7 +14,8 @@ import org.spongepowered.asm.mixin.injection.At;
 @Mixin(RecipeBookWidget.class)
 public class RecipeBookMixin {
 
-    @Shadow protected MinecraftClient client;
+    @Shadow
+    protected MinecraftClient client;
 
     @ModifyExpressionValue(method = "keyPressed", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/option/KeyBinding;matchesKey(II)Z"))
     private boolean disallowFocusWhenTyping(boolean original) {

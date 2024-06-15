@@ -4,8 +4,10 @@
   "name": "${mod_name}",
   "version": "${mod_version}",
   "description": "${mod_description}",
-  "authors": ["${mod_author}", "The Dude I Yoinked This From"],
-
+  "authors": [
+    "${mod_author}",
+    "The Dude I Yoinked This From"
+  ],
   "contact": {
     "homepage": "${mod_sources}",
     "sources": "${mod_sources}",
@@ -13,7 +15,6 @@
   },
   "license": "${mod_license}",
   "icon": "assets/easyrename/icon.png",
-
   "environment": "*",
   "accessWidener": "easyrename.accesswidener",
   "entrypoints": {
