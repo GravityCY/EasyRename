@@ -18,7 +18,7 @@ import java.nio.file.Path;
 public class ModConfig {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve(RenameMod.MOD_ID + ".json");
     public static ConfigClassHandler<ModConfig> HANDLER = ConfigClassHandler.createBuilder(ModConfig.class)
-            .id(new Identifier(RenameMod.MOD_ID, "config"))
+            .id(Identifier.of(RenameMod.MOD_ID, "config"))
             .serializer(handler -> GsonConfigSerializerBuilder
                     .create(handler)
                     .setPath(CONFIG_PATH)

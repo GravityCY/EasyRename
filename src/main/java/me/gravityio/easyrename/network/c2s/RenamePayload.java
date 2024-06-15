@@ -19,7 +19,7 @@ import net.minecraft.world.World;
  * A Packet sent from the client to the server that renames the currently opened container.
  */
 public class RenamePayload implements CustomPayload {
-    public static final Id<RenamePayload> ID = CustomPayload.id(new Identifier(RenameMod.MOD_ID, "rename").toString());
+    public static final Id<RenamePayload> ID = new CustomPayload.Id<>(Identifier.of(RenameMod.MOD_ID, "rename"));
     public static final PacketCodec<PacketByteBuf, RenamePayload> CODEC = PacketCodec.of(RenamePayload::write, RenamePayload::new);
 
     private final Text text;

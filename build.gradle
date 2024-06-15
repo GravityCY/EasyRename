@@ -17,21 +17,11 @@ replacement {
     ]
 }
 
-def changelog = "+ Fixed a bug where text showed in the player inventory screen in survival and creative."
-def mcVersions = ["1.20.5", "1.20.6"]
+def changelog = "- Update to 1.21!"
+def mcVersions = ["1.21"]
 
 version = project.mod_version
 group = "me.gravityio"
-
-def replace(String input, String name, Map<String, Map<String, String>> names) {
-    def cf = file("${name.toUpperCase()}.md");
-
-    def replaced = input
-    names[name].each {
-        replaced = replaced.replace('${'+it.key+'}', it.value)
-    }
-    cf.write(replaced, "UTF-8")
-}
 
 loom {
     accessWidenerPath = file("src/main/resources/easyrename.accesswidener")
@@ -114,7 +104,7 @@ repositories {
 dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:$project.fabric_version"
     modImplementation "dev.isxander:yet-another-config-lib:$project.yacl_version-fabric"
-    modImplementation "com.terraformersmc:modmenu:${project.modmenu_version}"
+    modImplementation "com.terraformersmc:modmenu:$project.modmenu_version"
 
     implementation("com.github.LlamaLad7:MixinExtras:0.1.1")
     annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
@@ -136,7 +126,8 @@ processResources  {
             "mod_license": project.mod_license,
             "loader_version": project.loader_version,
             "minecraft_version": project.minecraft_version,
-            "yacl_version": project.yacl_version
+            "yacl_version": project.yacl_version,
+            "fabric_version": project.fabric_version
     ]
 
     inputs.properties(modProperties)
@@ -147,14 +138,14 @@ processResources  {
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = 17
+    it.options.release = 21
 }
 
 java {
     withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_17
-    targetCompatibility = JavaVersion.VERSION_17
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 jar {

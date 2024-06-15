@@ -14,7 +14,7 @@ import net.minecraft.util.math.BlockPos;
  * @param pos
  */
 public record ScreenBlockDataPayload(BlockPos pos) implements CustomPayload {
-    public final static Id<ScreenBlockDataPayload> ID = CustomPayload.id(new Identifier(RenameMod.MOD_ID, "screen_data").toString());
+    public final static Id<ScreenBlockDataPayload> ID = new CustomPayload.Id<>(Identifier.of(RenameMod.MOD_ID, "screen_data"));
     public final static PacketCodec<RegistryByteBuf, ScreenBlockDataPayload> CODEC = PacketCodec.of(ScreenBlockDataPayload::write, ScreenBlockDataPayload::new);
 
     public ScreenBlockDataPayload(PacketByteBuf buf) {
