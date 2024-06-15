@@ -5,6 +5,7 @@ import me.gravityio.easyrename.RenameMod;
 import me.gravityio.easyrename.mixins.inter.BlockPosAccessor;
 import net.minecraft.block.entity.LockableContainerBlockEntity;
 import net.minecraft.inventory.DoubleInventory;
+import net.minecraft.inventory.Inventory;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.screen.ScreenHandler;
 import net.minecraft.screen.ScreenHandlerType;
@@ -32,9 +33,11 @@ public abstract class ServerPlayerEntityMixin {
         var packet = new OpenScreenS2CPacket(syncId, type, name);
         if (this.newOne == null) return packet;
 
-        var inv = this.newOne.slots.get(0).inventory;
-
+        Inventory inv = null;
         BlockPos pos = null;
+        if (!this.newOne.slots.isEmpty()) {
+            inv = this.newOne.slots.get(0).inventory;
+        }
 
         if (inv instanceof LockableContainerBlockEntity entity) {
             pos = entity.getPos();
