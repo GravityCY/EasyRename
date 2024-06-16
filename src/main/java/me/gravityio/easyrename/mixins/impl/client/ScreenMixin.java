@@ -99,9 +99,9 @@ public abstract class ScreenMixin implements INameableScreen {
         if (!this.easyRename$isNameable) return;
         DEBUG("[ScreenMixin] Initializing Nameable Screen with Custom Stuff");
 
-        var x = handled.getX();
-        var y = handled.getY() + 6;
-        this.easyRename$field = new TextFieldLabel(this.textRenderer, x, y, handled.getBackgroundWidth(), this.textRenderer.fontHeight, this.title);
+        var x = handled.easyRename$getX();
+        var y = handled.easyRename$getY() + 6;
+        this.easyRename$field = new TextFieldLabel(this.textRenderer, x, y, handled.easyRename$getBackgroundWidth(), this.textRenderer.fontHeight, this.title);
         this.easyRename$field.padding(8);
         if (handled instanceof AbstractFurnaceScreen<?> || handled instanceof BrewingStandScreen || handled instanceof Generic3x3ContainerScreen) {
             this.easyRename$field.align(0.5f);
@@ -149,10 +149,10 @@ public abstract class ScreenMixin implements INameableScreen {
     // Uniques
     @Unique
     private void easyRename$reval(HandledScreenAccessor handled) {
-        var x = handled.getX();
-        var y = handled.getY() + 6;
+        var x = handled.easyRename$getX();
+        var y = handled.easyRename$getY() + 6;
 
-        this.easyRename$field.setWidth(handled.getBackgroundWidth());
+        this.easyRename$field.setWidth(handled.easyRename$getBackgroundWidth());
         this.easyRename$field.setX(x);
         this.easyRename$field.setY(y);
     }
@@ -199,7 +199,7 @@ public abstract class ScreenMixin implements INameableScreen {
             var screenBlock = this.client.world.getBlockEntity(this.easyRename$pos);
             if (!(screenBlock instanceof LockableContainerBlockEntityAccessor lockable)) return;
             this.title = Text.literal(this.easyRename$field.text);
-            lockable.setCustomName(this.title);
+            lockable.easyRename$setCustomName(this.title);
             this.client.player.playSound(SoundEvents.UI_STONECUTTER_TAKE_RESULT, 0.2f, 1);
         } else {
             this.easyRename$timeSinceFail = System.currentTimeMillis();

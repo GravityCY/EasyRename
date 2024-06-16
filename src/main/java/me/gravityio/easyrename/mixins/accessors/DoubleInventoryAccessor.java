@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 @Mixin(DoubleInventory.class)
 public interface DoubleInventoryAccessor {
     @Accessor("first")
-    Inventory getFirst();
+    Inventory easyRename$getFirst();
     @Accessor("second")
-    Inventory getSecond();
+    Inventory easyRename$getSecond();
 }

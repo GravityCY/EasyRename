@@ -70,16 +70,16 @@ public class RenamePayload implements CustomPayload {
             DEBUG("[RenamePacket] Applying as a DoubleInventory");
             DEBUG("Setting Both to {}", this.text.getString());
 
-            var first = (LockableContainerBlockEntity) doubleInventory.getFirst();
-            var second = (LockableContainerBlockEntity) doubleInventory.getSecond();
+            var first = (LockableContainerBlockEntity) doubleInventory.easyRename$getFirst();
+            var second = (LockableContainerBlockEntity) doubleInventory.easyRename$getSecond();
             var firstAccess = (LockableContainerBlockEntityAccessor) first;
             var secondAccess = (LockableContainerBlockEntityAccessor) second;
             world = first.getWorld();
             pos = first.getPos();
             previous = first.getCustomName();
             run = () -> {
-                firstAccess.setCustomName(this.text);
-                secondAccess.setCustomName(this.text);
+                firstAccess.easyRename$setCustomName(this.text);
+                secondAccess.easyRename$setCustomName(this.text);
                 first.markDirty();
                 second.markDirty();
             };
@@ -92,7 +92,7 @@ public class RenamePayload implements CustomPayload {
             previous = lockable.getCustomName();
             pos = lockable.getPos();
             run = () -> {
-                lockableAccess.setCustomName(this.text);
+                lockableAccess.easyRename$setCustomName(this.text);
                 lockable.markDirty();
             };
         }

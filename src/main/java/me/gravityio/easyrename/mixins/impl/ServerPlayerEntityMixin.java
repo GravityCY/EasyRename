@@ -43,9 +43,9 @@ public abstract class ServerPlayerEntityMixin {
         if (inv instanceof LockableContainerBlockEntity entity) {
             pos = entity.getPos();
         } else if (inv instanceof DoubleInventoryAccessor dInv) {
-            if (dInv.getFirst() instanceof LockableContainerBlockEntity entity) {
+            if (dInv.easyRename$getFirst() instanceof LockableContainerBlockEntity entity) {
                 pos = entity.getPos();
-            } else if (dInv.getSecond() instanceof LockableContainerBlockEntity entity) {
+            } else if (dInv.easyRename$getSecond() instanceof LockableContainerBlockEntity entity) {
                 pos = entity.getPos();
             }
         }
