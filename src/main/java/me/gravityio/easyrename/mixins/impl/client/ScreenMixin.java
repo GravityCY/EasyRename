@@ -20,6 +20,7 @@ import net.minecraft.client.gui.screen.ingame.BrewingStandScreen;
 import net.minecraft.client.gui.screen.ingame.Generic3x3ContainerScreen;
 import net.minecraft.client.gui.screen.ingame.HandledScreen;
 import net.minecraft.client.render.LightmapTextureManager;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.RotationAxis;
@@ -45,20 +46,21 @@ import static me.gravityio.easyrename.RenameMod.DEBUG;
  */
 @Mixin(Screen.class)
 public abstract class ScreenMixin implements INameableScreen {
+    // Uniques
     @Unique
-    private static final long ANIMATION_TIME = 2500;
+    private static final long easyRename$ANIMATION_TIME = 2500;
     @Unique
-    private boolean isNameable;
+    private boolean easyRename$isNameable;
     @Unique
-    private TextFieldLabel field;
+    private TextFieldLabel easyRename$field;
     @Unique
-    private BlockPos pos;
+    private BlockPos easyRename$pos;
     @Unique
-    private long timeSinceFail = 0;
+    private long easyRename$timeSinceFail = -1;
 
+    // Shadow
     @Shadow
     protected abstract <T extends Element & Drawable> T addDrawableChild(T drawableElement);
-
     @Shadow
     @Nullable
     protected MinecraftClient client;
@@ -68,33 +70,7 @@ public abstract class ScreenMixin implements INameableScreen {
     @Final
     @Shadow
     protected Text title;
-
     @Shadow public int height;
-
-    @Override
-    public void easyRename$setNameable(boolean n) {
-        this.isNameable = n;
-    }
-
-    @Override
-    public boolean easyRename$isNameable() {
-        return this.isNameable;
-    }
-
-    @Override
-    public void easyRename$onResponse(boolean success) {
-        DEBUG("Received rename response of '{}'", success);
-        if (success) {
-            var screenBlock = this.client.world.getBlockEntity(this.pos);
-            if (!(screenBlock instanceof LockableContainerBlockEntityAccessor lockable)) return;
-            this.title = Text.literal(this.field.text);
-            lockable.setCustomName(this.title);
-        } else {
-            this.timeSinceFail = System.currentTimeMillis();
-            this.client.player.playSound(RenameMod.RENAME_DENY, 1, 1);
-            this.field.setText(this.title.getString());
-        }
-    }
 
     /**
      * Right after the screen is initialized we add our own title,
@@ -114,29 +90,29 @@ public abstract class ScreenMixin implements INameableScreen {
 
         HandledScreenAccessor handled = (HandledScreenAccessor) self;
 
-        this.pos = GlobalData.SCREEN_POS;
+        this.easyRename$pos = GlobalData.SCREEN_POS;
         GlobalData.SCREEN_POS = null;
 
-        var screenBlock = this.client.world.getBlockEntity(this.pos);
-        this.isNameable = screenBlock instanceof LockableContainerBlockEntityAccessor;
+        var screenBlock = this.client.world.getBlockEntity(this.easyRename$pos);
+        this.easyRename$isNameable = screenBlock instanceof LockableContainerBlockEntityAccessor;
 
-        if (!this.isNameable) return;
+        if (!this.easyRename$isNameable) return;
         DEBUG("[ScreenMixin] Initializing Nameable Screen with Custom Stuff");
 
         var x = handled.getX();
         var y = handled.getY() + 6;
-        this.field = new TextFieldLabel(this.textRenderer, x, y, handled.getBackgroundWidth(), this.textRenderer.fontHeight, this.title);
-        this.field.padding(8);
+        this.easyRename$field = new TextFieldLabel(this.textRenderer, x, y, handled.getBackgroundWidth(), this.textRenderer.fontHeight, this.title);
+        this.easyRename$field.padding(8);
         if (handled instanceof AbstractFurnaceScreen<?> || handled instanceof BrewingStandScreen || handled instanceof Generic3x3ContainerScreen) {
-            this.field.align(0.5f);
+            this.easyRename$field.align(0.5f);
         }
 
-        this.field.onEnterCB = (str) -> ClientPlayNetworking.send(new RenamePayload(Text.literal(str)));
-        this.addDrawableChild(this.field);
+        this.easyRename$field.onEnterCB = (str) -> ClientPlayNetworking.send(new RenamePayload(Text.literal(str)));
+        this.addDrawableChild(this.easyRename$field);
     }
 
     /**
-     * We re-evauluate every frame, because we can't control any side effects in regard to the screen ever-changing.<br>
+     * We re-evaluate every frame, because we can't control any side effects in regard to the screen ever-changing.<br>
      * Prime example is the furnace with the recipe book, as soon as the recipe book shifts the whole UI, our text is just hanging
      */
     @Inject(method = "render", at = @At("TAIL"))
@@ -144,34 +120,11 @@ public abstract class ScreenMixin implements INameableScreen {
         // TODO: maybe do some more tidy rendering?
         GlobalData.IS_TYPING = false;
         Screen self = (Screen) (Object) this;
-        if (!(self instanceof HandledScreenAccessor handled) || !this.isNameable) return;
-        GlobalData.IS_TYPING = this.field.isFocused();
-        this.reval(handled);
-        if (this.timeSinceFail != -1) {
-            long diff = System.currentTimeMillis() - this.timeSinceFail;
-            if (diff <= ANIMATION_TIME) {
-                var stack = context.getMatrices();
-                stack.push();
-                int width = this.textRenderer.getWidth("Need XP");
-                if (ANIMATION_TIME - diff <= 500) {
-                    float percent = 1 - (ANIMATION_TIME - diff) / 500f;
-                    stack.translate(0, -this.height / 2f * percent, 0);
-                }
-                stack.translate(this.field.getX() + width / 2.0, this.field.getY() + 4.5f, 0);
-                stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-15));
-                stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float) (-15 * Math.sin(diff / 300f))));
-                stack.translate(-width / 2f, -4.5f, 0);
-                this.textRenderer.draw("Need XP", 0, 0, 0xffff0000, true, stack.peek().getPositionMatrix(), context.getVertexConsumers(), TextRenderer.TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
-                stack.pop();
-            } else {
-                this.field.setColor(0x404040);
-                this.timeSinceFail = -1;
-            }
-        }
+        if (!(self instanceof HandledScreenAccessor handled) || !this.easyRename$isNameable) return;
+        GlobalData.IS_TYPING = this.easyRename$field.isFocused();
+        this.easyRename$reval(handled);
+        this.easyRename$renderXP(context);
     }
-
-
-
     /**
      * This gets called when the screen is resized, so we just re-add the
      * label to the screen, and let the render inject to do the resizing for us.
@@ -179,28 +132,79 @@ public abstract class ScreenMixin implements INameableScreen {
     @Inject(method = "clearAndInit", at = @At("TAIL"))
     private void onClearDoSetup(CallbackInfo ci) {
         Screen self = (Screen) (Object) this;
-        if (!(self instanceof HandledScreenAccessor handled) || !this.isNameable) return;
-        this.reval(handled);
-        this.addDrawableChild(this.field);
+        if (!(self instanceof HandledScreenAccessor handled) || !this.easyRename$isNameable) return;
+        this.easyRename$reval(handled);
+        this.addDrawableChild(this.easyRename$field);
     }
-
-    @Unique
-    private void reval(HandledScreenAccessor handled) {
-        var x = handled.getX();
-        var y = handled.getY() + 6;
-
-        this.field.setWidth(handled.getBackgroundWidth());
-        this.field.setX(x);
-        this.field.setY(y);
-    }
-
     /**
      * Do not close the screen when Escape is hit and is currently typing.
      */
     @ModifyReturnValue(method = "shouldCloseOnEsc", at = @At("RETURN"))
     private boolean shouldNotCloseIfTyping(boolean original) {
         Screen self = (Screen) (Object) this;
-        if (!(self instanceof HandledScreen<?>) || !this.isNameable) return original;
-        return this.field != null && this.field.isDisabled();
+        if (!(self instanceof HandledScreen<?>) || !this.easyRename$isNameable) return original;
+        return this.easyRename$field != null && this.easyRename$field.isDisabled();
+    }
+
+    // Uniques
+    @Unique
+    private void easyRename$reval(HandledScreenAccessor handled) {
+        var x = handled.getX();
+        var y = handled.getY() + 6;
+
+        this.easyRename$field.setWidth(handled.getBackgroundWidth());
+        this.easyRename$field.setX(x);
+        this.easyRename$field.setY(y);
+    }
+    /**
+     * We render the need xp text, with a little sin animation that rotates,
+     * and then at a certain point in time we fade it out by animating it off the screen
+     */
+    @Unique
+    private void easyRename$renderXP(DrawContext context) {
+        if (this.easyRename$timeSinceFail != -1) {
+            long diff = System.currentTimeMillis() - this.easyRename$timeSinceFail;
+            if (diff <= easyRename$ANIMATION_TIME) {
+                var stack = context.getMatrices();
+                stack.push();
+                int textWidth = this.textRenderer.getWidth("Need XP");
+                if (easyRename$ANIMATION_TIME - diff <= 500) {
+                    float percent = 1 - (easyRename$ANIMATION_TIME - diff) / 500f;
+                    stack.translate(0, -this.height / 2f * percent, 0);
+                }
+                stack.translate(this.easyRename$field.getX() + textWidth / 2.0, this.easyRename$field.getY() + 4.5f, 0);
+                stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-15));
+                stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float) (-15 * Math.sin(diff / 300f))));
+                stack.translate(-textWidth / 2f, -4.5f, 0);
+                this.textRenderer.draw("Need XP", 0, 0, 0xffff0000, true, stack.peek().getPositionMatrix(), context.getVertexConsumers(), TextRenderer.TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
+                stack.pop();
+            } else {
+                this.easyRename$field.setColor(0x404040);
+                this.easyRename$timeSinceFail = -1;
+            }
+        }
+    }
+    @Override
+    public void easyRename$setNameable(boolean n) {
+        this.easyRename$isNameable = n;
+    }
+    @Override
+    public boolean easyRename$isNameable() {
+        return this.easyRename$isNameable;
+    }
+    @Override
+    public void easyRename$onResponse(boolean success) {
+        DEBUG("Received rename response of '{}'", success);
+        if (success) {
+            var screenBlock = this.client.world.getBlockEntity(this.easyRename$pos);
+            if (!(screenBlock instanceof LockableContainerBlockEntityAccessor lockable)) return;
+            this.title = Text.literal(this.easyRename$field.text);
+            lockable.setCustomName(this.title);
+            this.client.player.playSound(SoundEvents.UI_STONECUTTER_TAKE_RESULT, 0.2f, 1);
+        } else {
+            this.easyRename$timeSinceFail = System.currentTimeMillis();
+            this.easyRename$field.setText(this.title.getString());
+            this.client.player.playSound(RenameMod.RENAME_DENY, 0.6f, 1);
+        }
     }
 }

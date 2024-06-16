@@ -72,7 +72,6 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
         RenameEvents.ON_RENAME.register(this::onRename);
     }
 
-
     /**
      * Updates the name of all nearby item frames at the given position in the world. <br><br>
      * <p>
@@ -89,11 +88,22 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
     private boolean doUseXP(RenameEvents.RenameData data) {
         if (!ModConfig.INSTANCE.useXP) return true;
         PlayerEntity player = data.player();
-        if (player.experienceLevel < 5) {
-            DEBUG("Player '{}' did not have enough xp to rename", player.getName());
-            return false;
+        if (ModConfig.INSTANCE.useLevels) {
+            DEBUG("Trying to use {} levels from player with {} levels", ModConfig.INSTANCE.cost, player.experienceLevel);
+            if (player.experienceLevel < ModConfig.INSTANCE.cost) {
+                DEBUG("Player '{}' did not have enough levels ({}) to rename ({})", player.getName(), player.experienceLevel, ModConfig.INSTANCE.cost);
+                return false;
+            }
+            player.addExperienceLevels(-ModConfig.INSTANCE.cost);
+        } else {
+            var experience = Helper.getTotalExperience(player);
+            DEBUG("Trying to use {} xp from player with {} xp", ModConfig.INSTANCE.cost, experience);
+            if (experience < ModConfig.INSTANCE.cost) {
+                DEBUG("Player '{}' did not have enough xp ({}) to rename (config: {})", player.getName(), experience, ModConfig.INSTANCE.cost);
+                return false;
+            }
+            player.addExperience(-ModConfig.INSTANCE.cost);
         }
-        player.addExperience(-ModConfig.INSTANCE.xpCost);
         return true;
     }
 

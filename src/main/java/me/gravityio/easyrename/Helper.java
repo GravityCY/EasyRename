@@ -3,6 +3,7 @@ package me.gravityio.easyrename;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.ChestBlock;
 import net.minecraft.block.enums.ChestType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Direction;
@@ -11,6 +12,31 @@ import net.minecraft.world.World;
 
 public class Helper {
 
+    /**
+     * Gets the total experience of a player
+     */
+    public static int getTotalExperience(PlayerEntity player) {
+        int xp = player.totalExperience == 0 ? (int) (player.experienceProgress * getExperienceForLevel(player.experienceLevel + 1)) : player.totalExperience;
+        for (int i = 0; i < player.experienceLevel; i++) {
+            xp += getExperienceForLevel(i);
+        }
+        return xp;
+    }
+
+    /**
+     * Gets the xp requirement to progress to the next level
+     */
+    public static int getExperienceForLevel(int level) {
+        if (level >= 30) {
+            return 112 + (level - 30) * 9;
+        } else {
+            return level >= 15 ? 37 + (level - 15) * 5 : 7 + level * 2;
+        }
+    }
+
+    /**
+     * Lerp colours
+     */
     public static int lerp(int argb, int toargb, float delta, boolean alpha) {
         int a = (argb & 0xFF000000) >> 24;
         int r = (argb & 0xFF0000) >> 16;

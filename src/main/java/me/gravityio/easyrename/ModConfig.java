@@ -44,7 +44,17 @@ public class ModConfig {
     @SerialEntry
     public boolean useXP = false;
     @SerialEntry
-    public int xpCost = 50;
+    public boolean useLevels = false;
+    @SerialEntry
+    public int cost = 50;
+
+    public boolean getUseLevels() {
+        return useLevels;
+    }
+
+    public void setUseLevels(boolean useLevels) {
+        this.useLevels = useLevels;
+    }
 
     public boolean getSyncItemFrame() {
         return syncItemFrame;
@@ -62,42 +72,50 @@ public class ModConfig {
         this.useXP = useXP;
     }
 
-    public int getXpCost() {
-        return xpCost;
+    public int getCost() {
+        return cost;
     }
 
-    public void setXpCost(int xpCost) {
-        this.xpCost = xpCost;
+    public void setCost(int xpCost) {
+        this.cost = xpCost;
     }
 
     public Screen getScreen(Screen p) {
         return YetAnotherConfigLib.create(HANDLER, (defaults, config, builder) -> {
             ConfigCategory.Builder main = ConfigCategory.createBuilder();
 
-            Option.Builder<Boolean> itemFrameOpt = opt(
+            var itemFrameOpt = opt(
                     RenameMod.MOD_ID, "syncItemFrame",
                     defaults.syncItemFrame, config::getSyncItemFrame, config::setSyncItemFrame,
                     opt -> BooleanControllerBuilder.create(opt).coloured(true).yesNoFormatter()
-            );
+            ).build();
 
-            Option.Builder<Integer> xpCostOpt = opt(
+            var useLevelOpt = opt(
+                    RenameMod.MOD_ID, "useLevels",
+                    defaults.useLevels, config::getUseLevels, config::setUseLevels,
+                    opt -> BooleanControllerBuilder.create(opt).coloured(true).yesNoFormatter()
+            ).build();
+
+            var xpCostOpt = opt(
                     RenameMod.MOD_ID, "xpCost",
-                    defaults.xpCost, config::getXpCost, config::setXpCost,
-                    opt -> IntegerFieldControllerBuilder.create(opt).min(0).max(500).formatValue(s -> Text.literal(s + "xp"))
-            );
+                    defaults.cost, config::getCost, config::setCost,
+                    opt -> IntegerFieldControllerBuilder.create(opt).min(0).max(500).formatValue(s -> useLevelOpt.pendingValue() ? Text.literal(s + "lvl") : Text.literal(s + "xp"))
+            ).build();
 
-            var built = xpCostOpt.build();
-
-            Option.Builder<Boolean> useXPOpt = opt(
+            var useXPOpt = opt(
                     RenameMod.MOD_ID, "useXP",
                     defaults.useXP, config::getUseXP, config::setUseXP,
                     opt -> BooleanControllerBuilder.create(opt).coloured(true).yesNoFormatter()
-            ).listener((opt, v) -> built.setAvailable(v));
+            ).listener((opt, v) -> {
+                xpCostOpt.setAvailable(v);
+                useLevelOpt.setAvailable(v);
+            }).build();
 
             main.name(Text.translatable("yacl.renamemod.title"))
-                    .option(itemFrameOpt.build())
-                    .option(useXPOpt.build())
-                    .option(built);
+                    .option(itemFrameOpt)
+                    .option(useXPOpt)
+                    .option(useLevelOpt)
+                    .option(xpCostOpt);
             builder.title(Text.translatable("yacl.renamemod.title"))
                     .category(main.build());
             return builder;
