@@ -17,7 +17,7 @@ replacement {
     ]
 }
 
-def changelog = "- Added an option to use your XP when renaming a container, you can choose whether to use xp levels or xp points."
+def changelog = "- Release a feature and immediately discover a bug. I'm a professional I swear"
 def mcVersions = ["1.21"]
 
 version = project.mod_version
