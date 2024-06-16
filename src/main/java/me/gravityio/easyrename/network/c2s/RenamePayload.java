@@ -76,7 +76,7 @@ public class RenamePayload implements CustomPayload {
             var secondAccess = (LockableContainerBlockEntityAccessor) second;
             world = first.getWorld();
             pos = first.getPos();
-            previous = first.getCustomName();
+            previous = first.getCustomName() == null ? first.getName() : first.getCustomName();
             run = () -> {
                 firstAccess.easyRename$setCustomName(this.text);
                 secondAccess.easyRename$setCustomName(this.text);
@@ -89,7 +89,7 @@ public class RenamePayload implements CustomPayload {
             var lockable = (LockableContainerBlockEntity) inv;
             var lockableAccess = (LockableContainerBlockEntityAccessor) inv;
             world = lockable.getWorld();
-            previous = lockable.getCustomName();
+            previous = lockable.getCustomName() == null ? lockable.getName() : lockable.getCustomName();
             pos = lockable.getPos();
             run = () -> {
                 lockableAccess.easyRename$setCustomName(this.text);
