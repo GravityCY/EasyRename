@@ -11,5 +11,5 @@
   "yacl.easyrename.useLevels.description": "Enable to use your XP levels, otherwise disable to use your XP points for renaming a container!",
 
   "yacl.easyrename.xpCost.label": "Cost",
-  "yacl.easyrename.xpCost.description": "How many XP Points / XP Levels to use when renaming a container."
+  "yacl.easyrename.xpCost.description": "How many XP Points / XP Levels to use when renaming a container.\n\nXP points scale with your level, so 50 points is ~4 levels when your level is 0 and ~2 levels when your level is 10."
 }
