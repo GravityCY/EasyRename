@@ -17,7 +17,7 @@ replacement {
     ]
 }
 
-def changelog = "- Fixed a bug with some mods adding special screens"
+def changelog = "- Added an option to use your XP when renaming a container, you can choose whether to use xp levels or xp points."
 def mcVersions = ["1.21"]
 
 version = project.mod_version
