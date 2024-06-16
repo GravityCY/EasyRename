@@ -123,7 +123,7 @@ public abstract class ScreenMixin implements INameableScreen {
         if (!(self instanceof HandledScreenAccessor handled) || !this.easyRename$isNameable) return;
         GlobalData.IS_TYPING = this.easyRename$field.isFocused();
         this.easyRename$reval(handled);
-        this.easyRename$renderXP(context);
+        this.easyRename$renderXP(context, handled);
     }
     /**
      * This gets called when the screen is resized, so we just re-add the
@@ -161,7 +161,7 @@ public abstract class ScreenMixin implements INameableScreen {
      * and then at a certain point in time we fade it out by animating it off the screen
      */
     @Unique
-    private void easyRename$renderXP(DrawContext context) {
+    private void easyRename$renderXP(DrawContext context, HandledScreenAccessor handled) {
         if (this.easyRename$timeSinceFail != -1) {
             long diff = System.currentTimeMillis() - this.easyRename$timeSinceFail;
             if (diff <= easyRename$ANIMATION_TIME) {
@@ -172,9 +172,11 @@ public abstract class ScreenMixin implements INameableScreen {
                     float percent = 1 - (easyRename$ANIMATION_TIME - diff) / 500f;
                     stack.translate(0, -this.height / 2f * percent, 0);
                 }
-                stack.translate(this.easyRename$field.getX() + textWidth / 2.0, this.easyRename$field.getY() + 4.5f, 0);
-                stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(-15));
-                stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float) (-15 * Math.sin(diff / 300f))));
+                float x = handled.easyRename$getX() + handled.easyRename$getBackgroundWidth();
+                float y = handled.easyRename$getY();
+                stack.translate(x, y, 0);
+                stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(15));
+                stack.multiply(RotationAxis.POSITIVE_Z.rotationDegrees((float) (15 * Math.sin(diff / 300f))));
                 stack.translate(-textWidth / 2f, -4.5f, 0);
                 this.textRenderer.draw("Need XP", 0, 0, 0xffff0000, true, stack.peek().getPositionMatrix(), context.getVertexConsumers(), TextRenderer.TextLayerType.NORMAL, 0, LightmapTextureManager.MAX_LIGHT_COORDINATE);
                 stack.pop();
