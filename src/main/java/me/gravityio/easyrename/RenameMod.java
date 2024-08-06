@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A Fabric Mod to make containers renameable
  */
-public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
+public class RenameMod implements ModInitializer {
     public static final String MOD_ID = "easyrename";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private static final Identifier RENAME_DENY_ID = id("ui.rename.fail");
@@ -52,14 +52,10 @@ public class RenameMod implements ModInitializer, PreLaunchEntrypoint {
     }
 
     @Override
-    public void onPreLaunch() {
-        MixinExtrasBootstrap.init();
+    public void onInitialize() {
         ModConfig.HANDLER.load();
         ModConfig.INSTANCE = ModConfig.HANDLER.instance();
-    }
 
-    @Override
-    public void onInitialize() {
         IS_DEBUG = FabricLoader.getInstance().isDevelopmentEnvironment();
 
         Registry.register(Registries.SOUND_EVENT, RENAME_DENY_ID, RENAME_DENY);

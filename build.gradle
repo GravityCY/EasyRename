@@ -72,8 +72,6 @@ project.dependencies.add("mappings", "net.fabricmc:yarn:${project.project.yarn_m
 project.dependencies.add("modImplementation", "net.fabricmc:fabric-loader:${project.loader_version}")
 
 repositories {
-    // Mixin Extras
-    maven { url 'https://jitpack.io' }
     // YACL
     maven {
         name "Xander Maven"
@@ -101,10 +99,6 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:$project.fabric_version"
     modImplementation "dev.isxander:yet-another-config-lib:$project.yacl_version-fabric"
     modImplementation "com.terraformersmc:modmenu:$project.modmenu_version"
-
-    implementation("com.github.LlamaLad7:MixinExtras:0.1.1")
-    annotationProcessor("com.github.LlamaLad7:MixinExtras:0.1.1")
-    include("com.github.LlamaLad7:MixinExtras:0.1.1")
 }
 
 base {

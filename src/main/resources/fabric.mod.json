@@ -30,9 +30,6 @@
     "main": [
       "me.gravityio.easyrename.RenameMod"
     ],
-    "preLaunch": [
-      "me.gravityio.easyrename.RenameMod"
-    ],
     "modmenu": [
       "me.gravityio.easyrename.compat.ModMenuApiImpl"
     ]
