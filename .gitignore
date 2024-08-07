@@ -40,3 +40,5 @@ replay_*.log
 *.jfr
 /CURSEFORGE.md
 /MODRINTH.md
+
+secrets.properties

@@ -4,7 +4,18 @@ plugins {
     id "com.modrinth.minotaur" version "2.+"
     id 'net.darkhax.curseforgegradle' version "1.1.24"
     id 'me.gravityio.replacementplugin' version "0.0.7"
+    id "me.gravityio.discord-webhook" version "0.0.2"
 }
+
+def changelog = "- Fixed an issue with Essential mod, and possibly with many others (Removed MixinExtras dependency)"
+def mcVersions = ["1.21"]
+def secrets = new Properties()
+
+project.file('secrets.properties').withInputStream { secrets.load(it) }
+project.ext.sharedData = [:]
+
+version = project.mod_version
+group = "me.gravityio"
 
 replacement {
     fileName = "README.md"
@@ -17,17 +28,20 @@ replacement {
     ]
 }
 
-def changelog = "- Release a feature and immediately discover a bug. I'm a professional I swear"
-def mcVersions = ["1.21"]
+sendDiscordWebhook.dependsOn("publishCurseForge", "modrinth")
+discordWebhook {
+    def modrinthURL = "https://modrinth.com/mod/easyrename/version/${project.mod_version}"
+    def curseURL = "https://www.curseforge.com/minecraft/mc-mods/easyrename/files/${project.ext.sharedData.curseFileId}"
+    def githubURL = "https://github.com/GravityCY/EasyRename/issues"
 
-version = project.mod_version
-group = "me.gravityio"
+    webhook_url = secrets.get("discord_webhook_url")
+    content = "# ${project.mod_name} ${project.mod_version} Update\n" + changelog + "\n\n[Modrinth](<${modrinthURL}>) | [Curseforge](<${curseURL}>)\n[GitHub](<${githubURL}>)"
+}
 
 tasks.register("publishMod") {
     group = "publishing"
 
-    dependsOn "publishCurseForge"
-    dependsOn "modrinth"
+    dependsOn "sendDiscordWebhook"
 }
 
 tasks.register('publishCurseForge', net.darkhax.curseforgegradle.TaskPublishCurseForge) {
@@ -49,6 +63,8 @@ tasks.register('publishCurseForge', net.darkhax.curseforgegradle.TaskPublishCurs
     mainFile.addRequirement("fabric-api")
     mainFile.addRequirement("yacl")
     mainFile.addOptional("modmenu")
+
+    ext.sharedData.curseFileId = mainFile.curseFileId
 }
 
 modrinth {
