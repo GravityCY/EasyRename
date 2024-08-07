@@ -34,7 +34,7 @@ discordWebhook {
     def curseURL = "https://www.curseforge.com/minecraft/mc-mods/easyrename/files/${project.ext.sharedData.curseFileId}"
     def githubURL = "https://github.com/GravityCY/EasyRename/issues"
 
-    webhook_url = secrets.get("discord_webhook_url")
+    webhook_url = secrets.get("discord_webhook_url") as String
     content = "# ${project.mod_name} ${project.mod_version} Update\n" + changelog + "\n\n[Modrinth](<${modrinthURL}>) | [Curseforge](<${curseURL}>)\n[GitHub](<${githubURL}>)"
 }
 
@@ -64,7 +64,7 @@ tasks.register('publishCurseForge', net.darkhax.curseforgegradle.TaskPublishCurs
     mainFile.addRequirement("yacl")
     mainFile.addOptional("modmenu")
 
-    ext.sharedData.curseFileId = mainFile.curseFileId
+    project.ext.sharedData.curseFileId = mainFile.curseFileId
 }
 
 modrinth {
