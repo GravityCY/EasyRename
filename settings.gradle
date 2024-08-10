@@ -9,3 +9,17 @@ pluginManagement {
         }
     }
 }
+
+
+plugins {
+    id "dev.kikugie.stonecutter" version "0.4.3"
+}
+
+stonecutter {
+    shared {
+        versions "1.21", "1.20.5"
+        vcsVersion = "1.21"
+    }
+
+    create rootProject
+}

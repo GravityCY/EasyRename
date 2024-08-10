@@ -2,10 +2,10 @@ package me.gravityio.easyrename;
 
 import net.fabricmc.fabric.api.event.Event;
 import net.fabricmc.fabric.api.event.EventFactory;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
 
 /**
  * A class that handles events related to renaming containers.
@@ -32,6 +32,6 @@ public class RenameEvents {
         boolean onRename(RenameData data);
     }
 
-    public record RenameData(PlayerEntity player, World world, BlockPos pos, Text oldName, Text newName){}
+    public record RenameData(Player player, Level world, BlockPos pos, Component oldName, Component newName){}
 
 }

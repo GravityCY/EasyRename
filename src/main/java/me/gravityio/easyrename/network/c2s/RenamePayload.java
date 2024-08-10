@@ -7,43 +7,44 @@ import me.gravityio.easyrename.mixins.accessors.LockableContainerBlockEntityAcce
 import me.gravityio.easyrename.network.s2c.RenameResponsePayload;
 import net.fabricmc.fabric.api.networking.v1.PacketSender;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
-import net.minecraft.block.entity.LockableContainerBlockEntity;
-import net.minecraft.inventory.DoubleInventory;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.server.network.ServerPlayerEntity;
-import net.minecraft.text.Text;
-import net.minecraft.text.TextCodecs;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import org.jetbrains.annotations.NotNull;
 
 import static me.gravityio.easyrename.RenameMod.DEBUG;
 
 /**
  * A Packet sent from the client to the server that renames the currently opened container.
  */
-public class RenamePayload implements CustomPayload {
-    public static final Id<RenamePayload> ID = new CustomPayload.Id<>(Identifier.of(RenameMod.MOD_ID, "rename"));
-    public static final PacketCodec<PacketByteBuf, RenamePayload> CODEC = PacketCodec.of(RenamePayload::write, RenamePayload::new);
+public class RenamePayload implements CustomPacketPayload {
+    public static final Type<RenamePayload> ID = new CustomPacketPayload.Type<>(RenameMod.id("rename"));
+    public static final StreamCodec<FriendlyByteBuf, RenamePayload> CODEC = StreamCodec.ofMember(RenamePayload::write, RenamePayload::new);
 
-    private final Text text;
+    private final Component text;
 
-    public RenamePayload(PacketByteBuf buf) {
-        this.text = buf.decodeAsJson(TextCodecs.CODEC);
+    public RenamePayload(FriendlyByteBuf buf) {
+        this.text = buf.readJsonWithCodec(ComponentSerialization.CODEC);
     }
 
-    public RenamePayload(Text text) {
+    public RenamePayload(Component text) {
         this.text = text;
     }
 
-    public void write(PacketByteBuf buf) {
-        buf.encodeAsJson(TextCodecs.CODEC, this.text);
+    public void write(FriendlyByteBuf buf) {
+        buf.writeJsonWithCodec(ComponentSerialization.CODEC, this.text);
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public @NotNull Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 
@@ -53,47 +54,47 @@ public class RenamePayload implements CustomPayload {
      * If it is a double chest, it attempts to rename both chests.
      * If it is a lockable block entity, it renames it.
      */
-    public void apply(ServerPlayerEntity serverPlayerEntity, PacketSender packetSender) {
-        if (serverPlayerEntity.currentScreenHandler == null) return;
-        if (serverPlayerEntity.currentScreenHandler.slots.isEmpty()) return;
-        var inv = serverPlayerEntity.currentScreenHandler.slots.getFirst().inventory;
+    public void apply(ServerPlayer serverPlayerEntity, PacketSender packetSender) {
+        if (serverPlayerEntity.containerMenu == null) return;
+        if (serverPlayerEntity.containerMenu.slots.isEmpty()) return;
+        var inv = serverPlayerEntity.containerMenu.slots.getFirst().container;
 
-        boolean isValid = inv instanceof DoubleInventory || inv instanceof LockableContainerBlockEntity;
+        boolean isValid = inv instanceof CompoundContainer || inv instanceof BaseContainerBlockEntity;
         if (!isValid) return;
 
-        World world;
+        Level world;
         BlockPos pos;
-        Text previous;
+        Component previous;
         Runnable run;
 
         if (inv instanceof DoubleInventoryAccessor doubleInventory) {
             DEBUG("[RenamePacket] Applying as a DoubleInventory");
             DEBUG("Setting Both to {}", this.text.getString());
 
-            var first = (LockableContainerBlockEntity) doubleInventory.easyRename$getFirst();
-            var second = (LockableContainerBlockEntity) doubleInventory.easyRename$getSecond();
+            var first = (BaseContainerBlockEntity) doubleInventory.easyRename$getFirst();
+            var second = (BaseContainerBlockEntity) doubleInventory.easyRename$getSecond();
             var firstAccess = (LockableContainerBlockEntityAccessor) first;
             var secondAccess = (LockableContainerBlockEntityAccessor) second;
-            world = first.getWorld();
-            pos = first.getPos();
+            world = first.getLevel();
+            pos = first.getBlockPos();
             previous = first.getCustomName() == null ? first.getName() : first.getCustomName();
             run = () -> {
                 firstAccess.easyRename$setCustomName(this.text);
                 secondAccess.easyRename$setCustomName(this.text);
-                first.markDirty();
-                second.markDirty();
+                first.setChanged();
+                second.setChanged();
             };
         } else {
             DEBUG("[RenamePacket] Applying as a LockableContainerBlockEntity");
             DEBUG("[RenamePacket] Setting Container to '{}'", this.text.getString());
-            var lockable = (LockableContainerBlockEntity) inv;
+            var lockable = (BaseContainerBlockEntity) inv;
             var lockableAccess = (LockableContainerBlockEntityAccessor) inv;
-            world = lockable.getWorld();
+            world = lockable.getLevel();
             previous = lockable.getCustomName() == null ? lockable.getName() : lockable.getCustomName();
-            pos = lockable.getPos();
+            pos = lockable.getBlockPos();
             run = () -> {
                 lockableAccess.easyRename$setCustomName(this.text);
-                lockable.markDirty();
+                lockable.setChanged();
             };
         }
 

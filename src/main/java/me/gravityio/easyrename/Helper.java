@@ -1,21 +1,21 @@
 package me.gravityio.easyrename;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.block.enums.ChestType;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.state.property.Properties;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Direction;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.ChestType;
 
 public class Helper {
 
     /**
      * Gets the total experience of a player
      */
-    public static int getTotalExperience(PlayerEntity player) {
+    public static int getTotalExperience(Player player) {
         int xp = player.totalExperience == 0 ? (int) (player.experienceProgress * getExperienceForLevel(player.experienceLevel + 1)) : player.totalExperience;
         for (int i = 0; i < player.experienceLevel; i++) {
             xp += getExperienceForLevel(i);
@@ -49,11 +49,11 @@ public class Helper {
         int tb = toargb & 0xFF;
 
         if (alpha) {
-            a = MathHelper.lerp(delta, a, ta) << 24;
+            a = (int) Mth.lerp(delta, a, ta) << 24;
         }
-        r = MathHelper.lerp(delta, r, tr) << 16;
-        g = MathHelper.lerp(delta, g, tg) << 8;
-        b = MathHelper.lerp(delta, b, tb);
+        r = (int) Mth.lerp(delta, r, tr) << 16;
+        g = (int) Mth.lerp(delta, g, tg) << 8;
+        b = (int) Mth.lerp(delta, b, tb);
 
         return a | r | g | b;
     }
@@ -65,10 +65,10 @@ public class Helper {
      * @param blockPos the position of the block
      * @return true if the block is a double chest, false otherwise
      */
-    public static boolean isDouble(World world, BlockPos blockPos) {
+    public static boolean isDouble(Level world, BlockPos blockPos) {
         BlockState blockState = world.getBlockState(blockPos);
-        if (blockState.contains(Properties.CHEST_TYPE)) {
-            ChestType type = blockState.get(ChestBlock.CHEST_TYPE);
+        if (blockState.hasProperty(BlockStateProperties.CHEST_TYPE)) {
+            ChestType type = blockState.getValue(ChestBlock.TYPE);
             return type == ChestType.LEFT || type == ChestType.RIGHT;
         }
         return false;
@@ -81,15 +81,15 @@ public class Helper {
      * @param pos   the position of the chest in the world
      * @return the direction of the other chest relative to the given position
      */
-    public static Direction getChestDirection(World world, BlockPos pos) {
+    public static Direction getChestDirection(Level world, BlockPos pos) {
         BlockState state = world.getBlockState(pos);
-        Direction facing = state.get(ChestBlock.FACING);
-        ChestType type = state.get(ChestBlock.CHEST_TYPE);
+        Direction facing = state.getValue(ChestBlock.FACING);
+        ChestType type = state.getValue(ChestBlock.TYPE);
 
         if (type == ChestType.LEFT) {
-            return facing.rotateYClockwise();
+            return facing.getClockWise();
         } else {
-            return facing.rotateYCounterclockwise();
+            return facing.getCounterClockWise();
         }
     }
 

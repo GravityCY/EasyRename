@@ -1,32 +1,31 @@
 package me.gravityio.easyrename.network.s2c;
 
 import me.gravityio.easyrename.RenameMod;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.network.RegistryByteBuf;
-import net.minecraft.network.codec.PacketCodec;
-import net.minecraft.network.packet.CustomPayload;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 
 /**
  * Sent in order to let the client know the block its `HandledScreen` belongs to.
  *
  * @param pos
  */
-public record ScreenBlockDataPayload(BlockPos pos) implements CustomPayload {
-    public final static Id<ScreenBlockDataPayload> ID = new CustomPayload.Id<>(Identifier.of(RenameMod.MOD_ID, "screen_data"));
-    public final static PacketCodec<RegistryByteBuf, ScreenBlockDataPayload> CODEC = PacketCodec.of(ScreenBlockDataPayload::write, ScreenBlockDataPayload::new);
+public record ScreenBlockDataPayload(BlockPos pos) implements CustomPacketPayload {
+    public final static Type<ScreenBlockDataPayload> ID = new Type<>(RenameMod.id("screen_data"));
+    public final static StreamCodec<FriendlyByteBuf, ScreenBlockDataPayload> CODEC = StreamCodec.ofMember(ScreenBlockDataPayload::write, ScreenBlockDataPayload::new);
 
-    public ScreenBlockDataPayload(PacketByteBuf buf) {
+    public ScreenBlockDataPayload(FriendlyByteBuf buf) {
         this((BlockPos) buf.readNullable(buf1 -> buf1.readBlockPos()));
     }
 
-    public void write(RegistryByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeNullable(this.pos, (buf1, value) -> buf1.writeBlockPos(value));
     }
 
     @Override
-    public Id<? extends CustomPayload> getId() {
+    public Type<? extends CustomPacketPayload> type() {
         return ID;
     }
 }

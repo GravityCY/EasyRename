@@ -1,6 +1,6 @@
 package me.gravityio.easyrename;
 
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
 
 /**
  * Data that should always associate to some context

@@ -1,15 +1,15 @@
 package me.gravityio.easyrename.mixins.accessors;
 
-import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(HandledScreen.class)
+@Mixin(AbstractContainerScreen.class)
 public interface HandledScreenAccessor {
-    @Accessor("x")
+    @Accessor("leftPos")
     int easyRename$getX();
-    @Accessor("y")
+    @Accessor("topPos")
     int easyRename$getY();
-    @Accessor("backgroundWidth")
+    @Accessor("imageWidth")
     int easyRename$getBackgroundWidth();
 }

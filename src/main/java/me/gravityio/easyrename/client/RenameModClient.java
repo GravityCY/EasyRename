@@ -10,6 +10,6 @@ public class RenameModClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         ClientPlayNetworking.registerGlobalReceiver(ScreenBlockDataPayload.ID, (payload, context) -> GlobalData.SCREEN_POS = payload.pos());
-        ClientPlayNetworking.registerGlobalReceiver(RenameResponsePayload.ID, (payload, context) -> payload.apply(context.client(),context.responseSender()));
+        ClientPlayNetworking.registerGlobalReceiver(RenameResponsePayload.TYPE, (payload, context) -> payload.apply(context.client(),context.responseSender()));
     }
 }

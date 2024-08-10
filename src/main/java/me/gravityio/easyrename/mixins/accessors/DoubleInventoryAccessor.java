@@ -1,14 +1,14 @@
 package me.gravityio.easyrename.mixins.accessors;
 
-import net.minecraft.inventory.DoubleInventory;
-import net.minecraft.inventory.Inventory;
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.Container;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(DoubleInventory.class)
+@Mixin(CompoundContainer.class)
 public interface DoubleInventoryAccessor {
-    @Accessor("first")
-    Inventory easyRename$getFirst();
-    @Accessor("second")
-    Inventory easyRename$getSecond();
+    @Accessor("container1")
+    Container easyRename$getFirst();
+    @Accessor("container2")
+    Container easyRename$getSecond();
 }

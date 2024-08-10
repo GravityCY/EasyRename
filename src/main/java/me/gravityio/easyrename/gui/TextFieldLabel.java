@@ -1,18 +1,18 @@
 package me.gravityio.easyrename.gui;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import me.gravityio.easyrename.StringHelper;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.screen.narration.NarrationPart;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.render.RenderLayer;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.util.Mth;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
@@ -22,13 +22,13 @@ import java.util.function.Consumer;
 /**
  * Pretty much just some simple rendered text that is also clickable and then editable.
  */
-public class TextFieldLabel extends ClickableWidget {
+public class TextFieldLabel extends AbstractWidget {
     public Consumer<String> onEnterCB;
     public Consumer<String> onChangedCB;
     public String text;
 
     protected String original;
-    protected final TextRenderer textRenderer;
+    protected final Font textRenderer;
     protected int color = 0xFF_404040;
     protected boolean shadow;
     protected int caretIndex;
@@ -115,19 +115,19 @@ public class TextFieldLabel extends ClickableWidget {
     /**
      * Gets which index an x value sits on in a string
      */
-    public static int getIndexAt(TextRenderer textRenderer, int x, int sx, String text) {
-        int i = MathHelper.floor(x) - sx;
-        return textRenderer.trimToWidth(text, i).length();
+    public static int getIndexAt(Font textRenderer, int x, int sx, String text) {
+        int i = Mth.floor(x) - sx;
+        return textRenderer.plainSubstrByWidth(text, i).length();
     }
 
-    public TextFieldLabel(TextRenderer textRenderer, int x, int y, int width, int height, @NotNull Text message) {
+    public TextFieldLabel(Font textRenderer, int x, int y, int width, int height, @NotNull Component message) {
         super(x, y, width, height, message);
         this.textRenderer = textRenderer;
         this.setText(super.getMessage().getString());
     }
 
     public boolean fits(String str) {
-        return this.textRenderer.getWidth(str) < super.width - padding * 2;
+        return this.textRenderer.width(str) < super.width - padding * 2;
     }
 
     public void padding(int newPadding) {
@@ -339,17 +339,17 @@ public class TextFieldLabel extends ClickableWidget {
             }
             return true;
         } else if (Screen.isPaste(keyCode)) {
-            this.write(MinecraftClient.getInstance().keyboard.getClipboard());
-            this.playDownSound(MinecraftClient.getInstance().getSoundManager());
+            this.write(Minecraft.getInstance().keyboardHandler.getClipboard());
+            this.playDownSound(Minecraft.getInstance().getSoundManager());
             return true;
         } else if (Screen.isCopy(keyCode)) {
-            MinecraftClient.getInstance().keyboard.setClipboard(this.text.substring(this.getSmallCaret(), this.getBigCaret()));
-            this.playDownSound(MinecraftClient.getInstance().getSoundManager());
+            Minecraft.getInstance().keyboardHandler.setClipboard(this.text.substring(this.getSmallCaret(), this.getBigCaret()));
+            this.playDownSound(Minecraft.getInstance().getSoundManager());
             return true;
         } else if (Screen.isCut(keyCode)) {
-            MinecraftClient.getInstance().keyboard.setClipboard(this.text.substring(this.getSmallCaret(), this.getBigCaret()));
+            Minecraft.getInstance().keyboardHandler.setClipboard(this.text.substring(this.getSmallCaret(), this.getBigCaret()));
             this.remove(0, true);
-            this.playDownSound(MinecraftClient.getInstance().getSoundManager());
+            this.playDownSound(Minecraft.getInstance().getSoundManager());
         } else if (Screen.isSelectAll(keyCode)) {
             this.setCaretIndex(0);
             this.setCaretEndIndex(this.text.length());
@@ -361,7 +361,7 @@ public class TextFieldLabel extends ClickableWidget {
     public boolean charTyped(char c, int modifiers) {
         if (this.isDisabled()) return false;
 
-        if (net.minecraft.util.StringHelper.isValidChar(c)) {
+        if (net.minecraft.util.StringUtil.isAllowedChatCharacter(c)) {
             this.write(String.valueOf(c));
             return true;
         }
@@ -370,14 +370,14 @@ public class TextFieldLabel extends ClickableWidget {
     }
 
     @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
+    public void renderWidget(GuiGraphics context, int mouseX, int mouseY, float delta) {
         if (!super.visible) return;
 
-        MatrixStack s = context.getMatrices();
-        s.push();
+        PoseStack s = context.pose();
+        s.pushPose();
         s.translate(this.renderX, super.getY(), 0);
 
-        context.drawText(this.textRenderer, this.text, 0, 0, this.color, this.shadow);
+        context.drawString(this.textRenderer, this.text, 0, 0, this.color, this.shadow);
         if (super.isFocused()) {
             if (System.currentTimeMillis() - lastRenderCaret >= 500) {
                 lastRenderCaret = System.currentTimeMillis();
@@ -386,30 +386,30 @@ public class TextFieldLabel extends ClickableWidget {
             if (this.caretIndex == this.caretEndIndex) {
                 if (doRenderCaret) {
                     if (this.caretIndex == this.text.length()) {
-                        context.fill(RenderLayer.getGuiOverlay(), this.caretPosition, this.textRenderer.fontHeight - 2, this.caretPosition + 5, this.textRenderer.fontHeight - 1, this.caretColor);
+                        context.fill(RenderType.guiOverlay(), this.caretPosition, this.textRenderer.lineHeight - 2, this.caretPosition + 5, this.textRenderer.lineHeight - 1, this.caretColor);
                     } else {
-                        context.fill(RenderLayer.getGuiOverlay(), this.caretPosition - 1, 0, this.caretPosition, this.textRenderer.fontHeight + 1, this.caretColor);
+                        context.fill(RenderType.guiOverlay(), this.caretPosition - 1, 0, this.caretPosition, this.textRenderer.lineHeight + 1, this.caretColor);
                     }
                 }
             } else {
                 int a = Math.min(this.caretPosition, this.caretEndPosition);
                 int b = Math.max(this.caretPosition, this.caretEndPosition);
-                context.fill(RenderLayer.getGuiTextHighlight(), a, 0, b, this.textRenderer.fontHeight + 1, -16776961);
+                context.fill(RenderType.guiTextHighlight(), a, 0, b, this.textRenderer.lineHeight + 1, -16776961);
             }
         }
 
-        s.pop();
+        s.popPose();
     }
 
     @Override
-    protected MutableText getNarrationMessage() {
-        Text text = this.getMessage();
-        return Text.translatable("gui.narrate.editBox", text, this.text);
+    protected @NotNull MutableComponent createNarrationMessage() {
+        Component text = this.getMessage();
+        return Component.translatable("gui.narrate.editBox", text, this.text);
     }
 
     @Override
-    protected void appendClickableNarrations(NarrationMessageBuilder builder) {
-        builder.put(NarrationPart.TITLE, this.getNarrationMessage());
+    protected void updateWidgetNarration(NarrationElementOutput builder) {
+        builder.add(NarratedElementType.TITLE, this.createNarrationMessage());
     }
 
     @Override
@@ -445,20 +445,20 @@ public class TextFieldLabel extends ClickableWidget {
     }
 
     private void updateWidth() {
-        this.textWidth = this.textRenderer.getWidth(this.text);
+        this.textWidth = this.textRenderer.width(this.text);
     }
 
     private void updateCaretPosition() {
-        this.caretPosition = this.textRenderer.getWidth(this.text.substring(0, this.caretIndex));
+        this.caretPosition = this.textRenderer.width(this.text.substring(0, this.caretIndex));
         this.caretEndPosition = this.caretPosition;
     }
 
     private void updateCaretEndPosition() {
-        this.caretEndPosition = this.textRenderer.getWidth(this.text.substring(0, this.caretEndIndex));
+        this.caretEndPosition = this.textRenderer.width(this.text.substring(0, this.caretEndIndex));
     }
 
     private void setCaretIndex(int i) {
-        i = MathHelper.clamp(i, 0, this.text.length());
+        i = Mth.clamp(i, 0, this.text.length());
 
         this.caretIndex = i;
         this.caretEndIndex = i;
@@ -466,7 +466,7 @@ public class TextFieldLabel extends ClickableWidget {
     }
 
     private void setCaretEndIndex(int i) {
-        i = MathHelper.clamp(i, 0, this.text.length());
+        i = Mth.clamp(i, 0, this.text.length());
 
         this.caretEndIndex = i;
         this.updateCaretEndPosition();

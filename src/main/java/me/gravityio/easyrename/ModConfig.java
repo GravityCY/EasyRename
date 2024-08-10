@@ -11,9 +11,9 @@ import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import net.fabricmc.loader.api.FabricLoader;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
+import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 
 import java.nio.file.Path;
 import java.util.function.Consumer;
@@ -23,7 +23,7 @@ import java.util.function.Supplier;
 public class ModConfig {
     private static final Path CONFIG_PATH = FabricLoader.getInstance().getConfigDir().resolve(RenameMod.MOD_ID + ".json");
     public static ConfigClassHandler<ModConfig> HANDLER = ConfigClassHandler.createBuilder(ModConfig.class)
-            .id(Identifier.of(RenameMod.MOD_ID, "config"))
+            .id(RenameMod.id("config"))
             .serializer(handler -> GsonConfigSerializerBuilder
                     .create(handler)
                     .setPath(CONFIG_PATH)
@@ -99,7 +99,7 @@ public class ModConfig {
             var xpCostOpt = opt(
                     RenameMod.MOD_ID, "xpCost",
                     defaults.cost, config::getCost, config::setCost,
-                    opt -> IntegerFieldControllerBuilder.create(opt).min(0).max(500).formatValue(s -> useLevelOpt.pendingValue() ? Text.literal(s + "lvl") : Text.literal(s + "xp"))
+                    opt -> IntegerFieldControllerBuilder.create(opt).min(0).max(500).formatValue(s -> useLevelOpt.pendingValue() ? Component.literal(s + "lvl") : Component.literal(s + "xp"))
             ).build();
 
             var useXPOpt = opt(
@@ -111,12 +111,12 @@ public class ModConfig {
                 useLevelOpt.setAvailable(v);
             }).build();
 
-            main.name(Text.translatable("yacl.renamemod.title"))
+            main.name(Component.translatable("yacl.renamemod.title"))
                     .option(itemFrameOpt)
                     .option(useXPOpt)
                     .option(useLevelOpt)
                     .option(xpCostOpt);
-            builder.title(Text.translatable("yacl.renamemod.title"))
+            builder.title(Component.translatable("yacl.renamemod.title"))
                     .category(main.build());
             return builder;
         }).generateScreen(p);
@@ -127,8 +127,8 @@ public class ModConfig {
         var description = "yacl.%s.%s.description".formatted(modid, name);
 
         return Option.<T>createBuilder()
-                .name(Text.translatable(label))
-                .description(OptionDescription.of(Text.translatable(description)))
+                .name(Component.translatable(label))
+                .description(OptionDescription.of(Component.translatable(description)))
                 .binding(def, getter, setter)
                 .controller(controllerBuilder);
     }

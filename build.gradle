@@ -11,11 +11,25 @@ def changelog = "- Fixed an issue with Essential mod, and possibly with many oth
 def mcVersions = ["1.21"]
 def secrets = new Properties()
 
-project.file('secrets.properties').withInputStream { secrets.load(it) }
-project.ext.sharedData = [:]
+rootProject.file('secrets.properties').withInputStream { secrets.load(it) }
+rootProject.ext.sharedData = [:]
 
-version = project.mod_version
+version = "$rootProject.mod_version+$stonecutter.current.version"
 group = "me.gravityio"
+
+loom {
+    runConfigs.all {
+        ideConfigGenerated(true) // Run configurations are not created for subprojects by default
+        runDir = "../../run" // Use a shared run folder and just create separate worlds
+    }
+}
+
+if (stonecutter.current.isActive) {
+    rootProject.tasks.register("buildActive") {
+        group = "project"
+        dependsOn(tasks.named("build"))
+    }
+}
 
 replacement {
     fileName = "README.md"
@@ -30,12 +44,12 @@ replacement {
 
 sendDiscordWebhook.dependsOn("publishCurseForge", "modrinth")
 discordWebhook {
-    def modrinthURL = "https://modrinth.com/mod/easyrename/version/${project.mod_version}"
-    def curseURL = "https://www.curseforge.com/minecraft/mc-mods/easyrename/files/${project.ext.sharedData.curseFileId}"
+    def modrinthURL = "https://modrinth.com/mod/easyrename/version/${rootProject.mod_version}"
+    def curseURL = "https://www.curseforge.com/minecraft/mc-mods/easyrename/files/${rootProject.ext.sharedData.curseFileId}"
     def githubURL = "https://github.com/GravityCY/EasyRename/issues"
 
     webhook_url = secrets.get("discord_webhook_url") as String
-    content = "# ${project.mod_name} ${project.mod_version} Update\n" + changelog + "\n\n[Modrinth](<${modrinthURL}>) | [Curseforge](<${curseURL}>)\n[GitHub](<${githubURL}>)"
+    content = "# ${rootProject.mod_name} ${rootProject.mod_version} Update\n" + changelog + "\n\n[Modrinth](<${modrinthURL}>) | [Curseforge](<${curseURL}>)\n[GitHub](<${githubURL}>)"
 }
 
 tasks.register("publishMod") {
@@ -83,9 +97,9 @@ modrinth {
     }
 }
 
-project.dependencies.add("minecraft", "com.mojang:minecraft:${project.minecraft_version}")
-project.dependencies.add("mappings", "net.fabricmc:yarn:${project.project.yarn_mappings}:v2")
-project.dependencies.add("modImplementation", "net.fabricmc:fabric-loader:${project.loader_version}")
+project.dependencies.add("minecraft", "com.mojang:minecraft:${stonecutter.current.version}")
+project.dependencies.add("mappings", loom.officialMojangMappings())
+project.dependencies.add("modImplementation", "net.fabricmc:fabric-loader:${rootProject.loader_version}")
 
 repositories {
     // YACL
@@ -112,9 +126,10 @@ repositories {
 }
 
 dependencies {
-    modImplementation "net.fabricmc.fabric-api:fabric-api:$project.fabric_version"
-    modImplementation "dev.isxander:yet-another-config-lib:$project.yacl_version-fabric"
-    modImplementation "com.terraformersmc:modmenu:$project.modmenu_version"
+    modImplementation("dev.isxander:yet-another-config-lib:$project.yacl_version-fabric")
+    modImplementation("com.terraformersmc:modmenu:$project.modmenu_version")
+
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 }
 
 base {
@@ -123,15 +138,16 @@ base {
 
 processResources  {
     def modProperties = [
-            "mod_id": project.mod_id,
-            "mod_name": project.mod_name,
-            "mod_version": project.mod_version,
-            "mod_description": project.mod_description,
-            "mod_author": project.mod_author,
-            "mod_sources": project.mod_sources,
-            "mod_license": project.mod_license,
-            "loader_version": project.loader_version,
-            "minecraft_version": project.minecraft_version,
+            "mod_id": rootProject.mod_id,
+            "mod_name": rootProject.mod_name,
+            "mod_version": rootProject.mod_version,
+            "mod_description": rootProject.mod_description,
+            "mod_author": rootProject.mod_author,
+            "mod_sources": rootProject.mod_sources,
+            "mod_license": rootProject.mod_license,
+            "loader_version": rootProject.loader_version,
+
+            "minecraft_version_range": project.minecraft_version_range,
             "yacl_version": project.yacl_version,
             "fabric_version": project.fabric_version
     ]
