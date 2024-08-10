@@ -10,29 +10,48 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentSerialization;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import org.jetbrains.annotations.NotNull;
 
+//? if >=1.20.5 {
+/*import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.codec.StreamCodec;
+*///?} else {
+import net.fabricmc.fabric.api.networking.v1.FabricPacket;
+import net.fabricmc.fabric.api.networking.v1.PacketType;
+//?}
+
+//? if =1.20 {
+
+//?} else {
+/*import net.minecraft.network.chat.ComponentSerialization;
+*///?}
+
 import static me.gravityio.easyrename.RenameMod.DEBUG;
 
 /**
  * A Packet sent from the client to the server that renames the currently opened container.
  */
-public class RenamePayload implements CustomPacketPayload {
+//? if >=1.20.5 {
+/*public class RenamePayload implements CustomPacketPayload {
     public static final Type<RenamePayload> ID = new CustomPacketPayload.Type<>(RenameMod.id("rename"));
     public static final StreamCodec<FriendlyByteBuf, RenamePayload> CODEC = StreamCodec.ofMember(RenamePayload::write, RenamePayload::new);
+*///?} else {
+    public class RenamePayload implements FabricPacket {
+        public static final PacketType<RenamePayload> TYPE = PacketType.create(RenameMod.id("rename"), RenamePayload::new);
 
+//?}
     private final Component text;
 
     public RenamePayload(FriendlyByteBuf buf) {
-        this.text = buf.readJsonWithCodec(ComponentSerialization.CODEC);
+        //? if =1.20 {
+        this.text = buf.readComponent();
+        //?} else {
+        /*this.text = buf.readJsonWithCodec(ComponentSerialization.CODEC);
+        *///?}
     }
 
     public RenamePayload(Component text) {
@@ -40,15 +59,27 @@ public class RenamePayload implements CustomPacketPayload {
     }
 
     public void write(FriendlyByteBuf buf) {
-        buf.writeJsonWithCodec(ComponentSerialization.CODEC, this.text);
+        //? if =1.20 {
+        buf.writeComponent(this.text);
+        //?} else {
+        /*buf.writeJsonWithCodec(ComponentSerialization.CODEC, this.text);
+        *///?}
     }
 
-    @Override
+    //? if >=1.20.5 {
+    /*@Override
     public @NotNull Type<? extends CustomPacketPayload> type() {
         return ID;
     }
+    *///?} else {
 
-    /**
+    @Override
+    public PacketType<?> getType() {
+        return TYPE;
+    }
+    //?}
+
+    /*
      * Renames the container associated with the player's current screen handler.
      * It checks if the container is a double chest or a lockable block entity.
      * If it is a double chest, it attempts to rename both chests.

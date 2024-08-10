@@ -13,11 +13,16 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 import org.jetbrains.annotations.NotNull;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+
+//? if <1.20.5 {
+import net.minecraft.SharedConstants;
+//?}
 
 /**
  * Pretty much just some simple rendered text that is also clickable and then editable.
@@ -361,7 +366,11 @@ public class TextFieldLabel extends AbstractWidget {
     public boolean charTyped(char c, int modifiers) {
         if (this.isDisabled()) return false;
 
-        if (net.minecraft.util.StringUtil.isAllowedChatCharacter(c)) {
+        //? if >=1.20.5 {
+        /*if (StringUtil.isAllowedChatCharacter(c)) {
+        *///?} else {
+        if (SharedConstants.isAllowedChatCharacter(c)) {
+        //?}
             this.write(String.valueOf(c));
             return true;
         }

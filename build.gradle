@@ -126,10 +126,14 @@ repositories {
 }
 
 dependencies {
-    modImplementation("dev.isxander:yet-another-config-lib:$project.yacl_version-fabric")
-    modImplementation("com.terraformersmc:modmenu:$project.modmenu_version")
-
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+
+    if (stonecutter.current.version == "1.20.3" || stonecutter.current.version == "1.20") {
+        modImplementation("dev.isxander.yacl:yet-another-config-lib-fabric:$project.yacl_version")
+    } else {
+        modImplementation("dev.isxander:yet-another-config-lib:$project.yacl_version-fabric")
+    }
+    modImplementation("com.terraformersmc:modmenu:$project.modmenu_version")
 }
 
 base {
