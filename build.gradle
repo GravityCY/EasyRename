@@ -142,7 +142,7 @@ tasks.register('publishCurseForge', net.darkhax.curseforgegradle.TaskPublishCurs
 }
 
 tasks.withType(JavaCompile).configureEach {
-    it.options.release = javaVersionNum
+    it.options.release = 17
 }
 
 processResources  {
@@ -171,8 +171,8 @@ processResources  {
 java {
     withSourcesJar()
 
-    sourceCompatibility = javaVersionObj
-    targetCompatibility = javaVersionObj
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
 }
 
 jar {
@@ -180,3 +180,4 @@ jar {
         rename { "${it}_${base.archivesName.get()}" }
     }
 }
+

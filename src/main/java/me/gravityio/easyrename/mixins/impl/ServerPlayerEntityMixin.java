@@ -37,7 +37,7 @@ public abstract class ServerPlayerEntityMixin {
         Container inv = null;
         BlockPos pos = null;
         if (!screenHandler.slots.isEmpty()) {
-            inv = screenHandler.slots.getFirst().container;
+            inv = screenHandler.slots.get(0).container;
         }
 
         if (inv instanceof BaseContainerBlockEntity entity) {

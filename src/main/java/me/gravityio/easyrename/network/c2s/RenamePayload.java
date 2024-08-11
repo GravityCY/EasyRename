@@ -88,7 +88,7 @@ public class RenamePayload implements CustomPacketPayload {
     public void apply(ServerPlayer serverPlayerEntity, PacketSender packetSender) {
         if (serverPlayerEntity.containerMenu == null) return;
         if (serverPlayerEntity.containerMenu.slots.isEmpty()) return;
-        var inv = serverPlayerEntity.containerMenu.slots.getFirst().container;
+        var inv = serverPlayerEntity.containerMenu.slots.get(0).container;
 
         boolean isValid = inv instanceof CompoundContainer || inv instanceof BaseContainerBlockEntity;
         if (!isValid) return;
