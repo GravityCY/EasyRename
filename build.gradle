@@ -1,28 +1,22 @@
 plugins {
-    id "fabric-loom" version "1.6-SNAPSHOT"
-    id "maven-publish"
+    id "fabric-loom" version "1.7-SNAPSHOT"
     id "com.modrinth.minotaur" version "2.+"
     id 'net.darkhax.curseforgegradle' version "1.1.24"
     id 'me.gravityio.replacementplugin' version "0.0.7"
     id "me.gravityio.discord-webhook" version "0.0.2"
 }
 
-def changelog = "- Fixed an issue with Essential mod, and possibly with many others (Removed MixinExtras dependency)"
-def mcVersions = ["1.21"]
+def changelog = "- Developing for old Minecraft versions should be easier now, the codebase is now based on stonecutter!"
+def mcVersions = project.minecraft_supported_versions.replace(" ", "").split(",").toList()
 def secrets = new Properties()
+def javaVersionNum = project.java_version.toInteger()
+def javaVersionObj = JavaVersion.toVersion(javaVersionNum)
 
 rootProject.file('secrets.properties').withInputStream { secrets.load(it) }
 rootProject.ext.sharedData = [:]
 
 version = "$rootProject.mod_version+$stonecutter.current.version"
 group = "me.gravityio"
-
-loom {
-    runConfigs.all {
-        ideConfigGenerated(true) // Run configurations are not created for subprojects by default
-        runDir = "../../run" // Use a shared run folder and just create separate worlds
-    }
-}
 
 if (stonecutter.current.isActive) {
     rootProject.tasks.register("buildActive") {
@@ -31,70 +25,8 @@ if (stonecutter.current.isActive) {
     }
 }
 
-replacement {
-    fileName = "README.md"
-    types = ["modrinth", "curseforge"]
-    values = [
-            "fabric": ["https://modrinth.com/mod/fabric-api", "https://curseforge.com/minecraft/mc-mods/fabric-api"],
-            "yacl": ["https://modrinth.com/mod/yacl", "https://curseforge.com/minecraft/mc-mods/yacl"],
-            "modmenu": ["https://modrinth.com/mod/modmenu", "https://curseforge.com/minecraft/mc-mods/modmenu"],
-            "inventory_tabs": ["https://modrinth.com/mod/inventory-tabs", "https://www.curseforge.com/minecraft/mc-mods/inventory-tabs-updated"]
-    ]
-}
-
-sendDiscordWebhook.dependsOn("publishCurseForge", "modrinth")
-discordWebhook {
-    def modrinthURL = "https://modrinth.com/mod/easyrename/version/${rootProject.mod_version}"
-    def curseURL = "https://www.curseforge.com/minecraft/mc-mods/easyrename/files/${rootProject.ext.sharedData.curseFileId}"
-    def githubURL = "https://github.com/GravityCY/EasyRename/issues"
-
-    webhook_url = secrets.get("discord_webhook_url") as String
-    content = "# ${rootProject.mod_name} ${rootProject.mod_version} Update\n" + changelog + "\n\n[Modrinth](<${modrinthURL}>) | [Curseforge](<${curseURL}>)\n[GitHub](<${githubURL}>)"
-}
-
-tasks.register("publishMod") {
-    group = "publishing"
-
-    dependsOn "sendDiscordWebhook"
-}
-
-tasks.register('publishCurseForge', net.darkhax.curseforgegradle.TaskPublishCurseForge) {
-    disableVersionDetection()
-
-    group = "publishing"
-    apiToken = System.getenv("CURSEFORGE_UPLOAD");
-
-    def mainFile = upload(1027188, remapJar)
-    mainFile.addEnvironment("Client", "Server")
-    mainFile.changelog = changelog
-    mcVersions.each {
-        mainFile.addGameVersion(it)
-    }
-    mainFile.displayName = "Easy Rename ${mod_version}"
-    mainFile.addModLoader("Fabric")
-    mainFile.releaseType = "release"
-    mainFile.addJavaVersion("Java 21")
-    mainFile.addRequirement("fabric-api")
-    mainFile.addRequirement("yacl")
-    mainFile.addOptional("modmenu")
-
-    project.ext.sharedData.curseFileId = mainFile.curseFileId
-}
-
-modrinth {
-    token = System.getenv("MODRINTH_UPLOAD")
-    projectId = "easyrename"
-    versionName = "Easy Rename $mod_version"
-    versionNumber = mod_version
-    uploadFile = remapJar
-    gameVersions = mcVersions
-    loaders = ["fabric"]
-    delegate.changelog = changelog
-    dependencies {
-        required.project "fabric-api"
-        required.project "yacl"
-        optional.project "modmenu"
-    }
+base {
+    archivesName = project.mod_id
 }
 
 project.dependencies.add("minecraft", "com.mojang:minecraft:${stonecutter.current.version}")
@@ -136,15 +68,88 @@ dependencies {
     modImplementation("com.terraformersmc:modmenu:$project.modmenu_version")
 }
 
-base {
-    archivesName = project.mod_id
+loom {
+    runConfigs.all {
+        ideConfigGenerated(true) // Run configurations are not created for subprojects by default
+        runDir = "../../run" // Use a shared run folder and just create separate worlds
+    }
+}
+
+replacement {
+    fileName = "README.md"
+    types = ["modrinth", "curseforge"]
+    values = [
+            "fabric": ["https://modrinth.com/mod/fabric-api", "https://curseforge.com/minecraft/mc-mods/fabric-api"],
+            "yacl": ["https://modrinth.com/mod/yacl", "https://curseforge.com/minecraft/mc-mods/yacl"],
+            "modmenu": ["https://modrinth.com/mod/modmenu", "https://curseforge.com/minecraft/mc-mods/modmenu"],
+            "inventory_tabs": ["https://modrinth.com/mod/inventory-tabs", "https://www.curseforge.com/minecraft/mc-mods/inventory-tabs-updated"]
+    ]
+}
+
+sendDiscordWebhook.dependsOn("publishCurseForge", "modrinth")
+discordWebhook {
+    def modrinthURL = "https://modrinth.com/mod/easyrename/version/${rootProject.mod_version}"
+    def curseURL = "https://www.curseforge.com/minecraft/mc-mods/easyrename/files/${rootProject.ext.sharedData.curseFileId}"
+    def githubURL = "https://github.com/GravityCY/EasyRename/issues"
+
+    webhook_url = secrets.get("discord_webhook_url") as String
+    content = "# ${rootProject.mod_name} ${rootProject.mod_version} Update\n" + changelog + "\n\n[Modrinth](<${modrinthURL}>) | [Curseforge](<${curseURL}>)\n[GitHub](<${githubURL}>)"
+}
+
+modrinth {
+    token = System.getenv("MODRINTH_UPLOAD")
+    projectId = rootProject.modrinth_project_id
+    versionName = "Easy Rename $project.version"
+    versionNumber = project.version
+    uploadFile = remapJar
+    gameVersions = mcVersions
+    loaders = ["fabric"]
+    delegate.changelog = changelog
+    dependencies {
+        required.project "fabric-api"
+        required.project "yacl"
+        optional.project "modmenu"
+    }
+}
+
+tasks.register("publishMod") {
+    group = "publishing"
+
+    dependsOn "sendDiscordWebhook"
+}
+
+tasks.register('publishCurseForge', net.darkhax.curseforgegradle.TaskPublishCurseForge) {
+    disableVersionDetection()
+
+    group = "publishing"
+    apiToken = System.getenv("CURSEFORGE_UPLOAD");
+
+    def mainFile = upload(rootProject.curseforge_project_id.toInteger(), remapJar)
+    mainFile.addEnvironment("Client", "Server")
+    mainFile.changelog = changelog
+    mcVersions.each {
+        mainFile.addGameVersion(it)
+    }
+    mainFile.displayName = "Easy Rename ${project.version}"
+    mainFile.addModLoader("Fabric")
+    mainFile.releaseType = "release"
+    mainFile.addJavaVersion("Java ${java_version_num}")
+    mainFile.addRequirement("fabric-api")
+    mainFile.addRequirement("yacl")
+    mainFile.addOptional("modmenu")
+
+    project.ext.sharedData.curseFileId = mainFile.curseFileId
+}
+
+tasks.withType(JavaCompile).configureEach {
+    it.options.release = javaVersionNum
 }
 
 processResources  {
     def modProperties = [
             "mod_id": rootProject.mod_id,
             "mod_name": rootProject.mod_name,
-            "mod_version": rootProject.mod_version,
+            "mod_version": project.version,
             "mod_description": rootProject.mod_description,
             "mod_author": rootProject.mod_author,
             "mod_sources": rootProject.mod_sources,
@@ -163,28 +168,15 @@ processResources  {
     }
 }
 
-tasks.withType(JavaCompile).configureEach {
-    it.options.release = 21
-}
-
 java {
     withSourcesJar()
 
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = javaVersionObj
+    targetCompatibility = javaVersionObj
 }
 
 jar {
     from("LICENSE") {
         rename { "${it}_${base.archivesName.get()}" }
     }
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            from components.java
-        }
-    }
-    repositories {}
 }
