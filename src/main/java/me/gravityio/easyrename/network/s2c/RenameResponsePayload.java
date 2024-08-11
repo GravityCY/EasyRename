@@ -8,25 +8,25 @@ import net.minecraft.network.FriendlyByteBuf;
 import org.jetbrains.annotations.NotNull;
 
 //? if >=1.20.5 {
-/*import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.codec.StreamCodec;
-*///?} else {
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
+//?} else {
+/*import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
-//?}
+*///?}
 
 /**
  * A Packet sent from the client to the server that renames the currently opened container.
  */
 //? if >=1.20.5 {
-/*public class RenameResponsePayload implements CustomPacketPayload {
+public class RenameResponsePayload implements CustomPacketPayload {
     public static final Type<RenameResponsePayload> TYPE = new Type<>(RenameMod.id("rename_response"));
     public static final StreamCodec<FriendlyByteBuf, RenameResponsePayload> CODEC = StreamCodec.ofMember(RenameResponsePayload::write, RenameResponsePayload::new);
-*///?} else {
-public class RenameResponsePayload implements FabricPacket {
+//?} else {
+/*public class RenameResponsePayload implements FabricPacket {
     public static final PacketType<RenameResponsePayload> TYPE = PacketType.create(RenameMod.id("rename_response"), RenameResponsePayload::new);
 
-//?}
+*///?}
 
     private final boolean success;
 
@@ -43,16 +43,16 @@ public class RenameResponsePayload implements FabricPacket {
     }
 
     //? if >=1.20.5 {
-    /*@Override
+    @Override
     public @NotNull Type<? extends CustomPacketPayload> type() {
         return TYPE;
     }
-    *///?} else {
-    @Override
+    //?} else {
+    /*@Override
     public PacketType<?> getType() {
         return TYPE;
     }
-    //?}
+    *///?}
 
     public void apply(Minecraft client, PacketSender packetSender) {
         var screen = (INameableScreen) client.screen;

@@ -11,11 +11,11 @@ public class RenameModClient implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         //? if >=1.20.5 {
-        /*ClientPlayNetworking.registerGlobalReceiver(ScreenBlockDataPayload.ID, (payload, context) -> GlobalData.SCREEN_POS = payload.pos());
+        ClientPlayNetworking.registerGlobalReceiver(ScreenBlockDataPayload.ID, (payload, context) -> GlobalData.SCREEN_POS = payload.pos());
         ClientPlayNetworking.registerGlobalReceiver(RenameResponsePayload.TYPE, (payload, context) -> payload.apply(context.client(),context.responseSender()));
-        *///?} else {
-            ClientPlayNetworking.registerGlobalReceiver(ScreenBlockDataPayload.TYPE, (packet, player, responseSender) -> GlobalData.SCREEN_POS = packet.pos());
+        //?} else {
+            /*ClientPlayNetworking.registerGlobalReceiver(ScreenBlockDataPayload.TYPE, (packet, player, responseSender) -> GlobalData.SCREEN_POS = packet.pos());
             ClientPlayNetworking.registerGlobalReceiver(RenameResponsePayload.TYPE, (packet, player, responseSender) -> packet.apply(Minecraft.getInstance(),responseSender));
-        //?}
+        *///?}
     }
 }

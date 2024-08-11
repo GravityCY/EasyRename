@@ -17,18 +17,18 @@ import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import org.jetbrains.annotations.NotNull;
 
 //? if >=1.20.5 {
-/*import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.network.codec.StreamCodec;
-*///?} else {
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
+//?} else {
+/*import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.PacketType;
-//?}
+*///?}
 
 //? if =1.20 {
 
 //?} else {
-/*import net.minecraft.network.chat.ComponentSerialization;
-*///?}
+import net.minecraft.network.chat.ComponentSerialization;
+//?}
 
 import static me.gravityio.easyrename.RenameMod.DEBUG;
 
@@ -36,22 +36,22 @@ import static me.gravityio.easyrename.RenameMod.DEBUG;
  * A Packet sent from the client to the server that renames the currently opened container.
  */
 //? if >=1.20.5 {
-/*public class RenamePayload implements CustomPacketPayload {
+public class RenamePayload implements CustomPacketPayload {
     public static final Type<RenamePayload> ID = new CustomPacketPayload.Type<>(RenameMod.id("rename"));
     public static final StreamCodec<FriendlyByteBuf, RenamePayload> CODEC = StreamCodec.ofMember(RenamePayload::write, RenamePayload::new);
-*///?} else {
-    public class RenamePayload implements FabricPacket {
+//?} else {
+    /*public class RenamePayload implements FabricPacket {
         public static final PacketType<RenamePayload> TYPE = PacketType.create(RenameMod.id("rename"), RenamePayload::new);
 
-//?}
+*///?}
     private final Component text;
 
     public RenamePayload(FriendlyByteBuf buf) {
         //? if =1.20 {
-        this.text = buf.readComponent();
-        //?} else {
-        /*this.text = buf.readJsonWithCodec(ComponentSerialization.CODEC);
-        *///?}
+        /*this.text = buf.readComponent();
+        *///?} else {
+        this.text = buf.readJsonWithCodec(ComponentSerialization.CODEC);
+        //?}
     }
 
     public RenamePayload(Component text) {
@@ -60,24 +60,24 @@ import static me.gravityio.easyrename.RenameMod.DEBUG;
 
     public void write(FriendlyByteBuf buf) {
         //? if =1.20 {
-        buf.writeComponent(this.text);
-        //?} else {
-        /*buf.writeJsonWithCodec(ComponentSerialization.CODEC, this.text);
-        *///?}
+        /*buf.writeComponent(this.text);
+        *///?} else {
+        buf.writeJsonWithCodec(ComponentSerialization.CODEC, this.text);
+        //?}
     }
 
     //? if >=1.20.5 {
-    /*@Override
+    @Override
     public @NotNull Type<? extends CustomPacketPayload> type() {
         return ID;
     }
-    *///?} else {
+    //?} else {
 
-    @Override
+    /*@Override
     public PacketType<?> getType() {
         return TYPE;
     }
-    //?}
+    *///?}
 
     /*
      * Renames the container associated with the player's current screen handler.

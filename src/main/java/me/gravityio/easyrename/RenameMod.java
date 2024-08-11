@@ -26,9 +26,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 //? if >=1.20.5 {
-/*import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.DataComponents;
 import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-*///?}
+//?}
 
 /**
  * A Fabric Mod to make containers renameable
@@ -42,10 +42,10 @@ public class RenameMod implements ModInitializer {
 
     public static ResourceLocation id(String str) {
         //? if <1.21 {
-         return new ResourceLocation(MOD_ID, str);
-        //?} else {
-        /*return ResourceLocation.fromNamespaceAndPath(MOD_ID, str);
-        *///?}
+         /*return new ResourceLocation(MOD_ID, str);
+        *///?} else {
+        return ResourceLocation.fromNamespaceAndPath(MOD_ID, str);
+        //?}
     }
     public static void DEBUG(String s, Object... args) {
         if (!IS_DEBUG) return;
@@ -66,14 +66,14 @@ public class RenameMod implements ModInitializer {
         Registry.register(BuiltInRegistries.SOUND_EVENT, RENAME_DENY_ID, RENAME_DENY);
 
         //? if >=1.20.5 {
-        /*PayloadTypeRegistry.playC2S().register(RenamePayload.ID, RenamePayload.CODEC);
+        PayloadTypeRegistry.playC2S().register(RenamePayload.ID, RenamePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(RenameResponsePayload.TYPE,RenameResponsePayload.CODEC);
         PayloadTypeRegistry.playS2C().register(ScreenBlockDataPayload.ID, ScreenBlockDataPayload.CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(RenamePayload.ID, (payload, context) -> payload.apply(context.player(), context.responseSender()));
-        *///?} else {
-        ServerPlayNetworking.registerGlobalReceiver(RenamePayload.TYPE, (packet, player, responseSender) -> packet.apply(player, responseSender));
-        //?}
+        //?} else {
+        /*ServerPlayNetworking.registerGlobalReceiver(RenamePayload.TYPE, (packet, player, responseSender) -> packet.apply(player, responseSender));
+        *///?}
 
         RenameEvents.ON_RENAME.register(this::onRename);
     }
@@ -140,10 +140,10 @@ public class RenameMod implements ModInitializer {
             var stack = frame.getItem();
             if (stack.isEmpty()) continue;
             //? if >=1.20.5 {
-            /*stack.set(DataComponents.CUSTOM_NAME, newName);
-            *///?} else {
-            stack.setHoverName(newName);
-            //?}
+            stack.set(DataComponents.CUSTOM_NAME, newName);
+            //?} else {
+            /*stack.setHoverName(newName);
+            *///?}
             frame.setItem(stack);
         }
     }

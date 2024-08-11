@@ -21,8 +21,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 //? if <1.20.5 {
-import net.minecraft.SharedConstants;
-//?}
+/*import net.minecraft.SharedConstants;
+*///?}
 
 /**
  * Pretty much just some simple rendered text that is also clickable and then editable.
@@ -367,10 +367,10 @@ public class TextFieldLabel extends AbstractWidget {
         if (this.isDisabled()) return false;
 
         //? if >=1.20.5 {
-        /*if (StringUtil.isAllowedChatCharacter(c)) {
-        *///?} else {
-        if (SharedConstants.isAllowedChatCharacter(c)) {
-        //?}
+        if (StringUtil.isAllowedChatCharacter(c)) {
+        //?} else {
+        /*if (SharedConstants.isAllowedChatCharacter(c)) {
+        *///?}
             this.write(String.valueOf(c));
             return true;
         }
