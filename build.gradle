@@ -15,13 +15,19 @@ def javaVersionObj = JavaVersion.toVersion(javaVersionNum)
 rootProject.file('secrets.properties').withInputStream { secrets.load(it) }
 rootProject.ext.sharedData = [:]
 
-version = "$rootProject.mod_version+$stonecutter.current.version"
+version = "$rootProject.mod_version+$project.name"
 group = "me.gravityio"
+
+println version
 
 if (stonecutter.current.isActive) {
     rootProject.tasks.register("buildActive") {
         group = "project"
         dependsOn(tasks.named("build"))
+    }
+    rootProject.tasks.register("publishActive") {
+        group = "project"
+        dependsOn(tasks.named("publishMod"))
     }
 }
 
@@ -86,14 +92,13 @@ replacement {
     ]
 }
 
-sendDiscordWebhook.dependsOn("publishCurseForge", "modrinth")
 discordWebhook {
-    def modrinthURL = "https://modrinth.com/mod/easyrename/version/${rootProject.mod_version}"
+    def modrinthURL = "https://modrinth.com/mod/easyrename/version/${project.version}"
     def curseURL = "https://www.curseforge.com/minecraft/mc-mods/easyrename/files/${rootProject.ext.sharedData.curseFileId}"
     def githubURL = "https://github.com/GravityCY/EasyRename/issues"
 
     webhook_url = secrets.get("discord_webhook_url") as String
-    content = "# ${rootProject.mod_name} ${rootProject.mod_version} Update\n" + changelog + "\n\n[Modrinth](<${modrinthURL}>) | [Curseforge](<${curseURL}>)\n[GitHub](<${githubURL}>)"
+    content = "# ${rootProject.mod_name} ${project.version} Update\n" + changelog + "\n\n[Modrinth](<${modrinthURL}>) | [Curseforge](<${curseURL}>)\n[GitHub](<${githubURL}>)"
 }
 
 modrinth {
@@ -115,7 +120,11 @@ modrinth {
 tasks.register("publishMod") {
     group = "publishing"
 
-    dependsOn "sendDiscordWebhook"
+    dependsOn "modrinth"
+    dependsOn "publishCurseForge"
+    doLast {
+        tasks.named("sendDiscordWebhook").execute()
+    }
 }
 
 tasks.register('publishCurseForge', net.darkhax.curseforgegradle.TaskPublishCurseForge) {
@@ -133,12 +142,12 @@ tasks.register('publishCurseForge', net.darkhax.curseforgegradle.TaskPublishCurs
     mainFile.displayName = "Easy Rename ${project.version}"
     mainFile.addModLoader("Fabric")
     mainFile.releaseType = "release"
-    mainFile.addJavaVersion("Java ${java_version_num}")
+    mainFile.addJavaVersion("Java ${javaVersionNum}")
     mainFile.addRequirement("fabric-api")
     mainFile.addRequirement("yacl")
     mainFile.addOptional("modmenu")
 
-    project.ext.sharedData.curseFileId = mainFile.curseFileId
+    rootProject.ext.sharedData.curseFileId = mainFile.curseFileId
 }
 
 tasks.withType(JavaCompile).configureEach {
