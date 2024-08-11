@@ -21,8 +21,8 @@ import net.fabricmc.fabric.api.networking.v1.PacketType;
     public final static Type<ScreenBlockDataPayload> ID = new Type<>(RenameMod.id("screen_data"));
     public final static StreamCodec<FriendlyByteBuf, ScreenBlockDataPayload> CODEC = StreamCodec.ofMember(ScreenBlockDataPayload::write, ScreenBlockDataPayload::new);
 *///?} else {
-    public record ScreenBlockDataPayload(BlockPos pos) implements FabricPacket {
-        public static final PacketType<ScreenBlockDataPayload> TYPE = PacketType.create(RenameMod.id("screen_data"), ScreenBlockDataPayload::new);
+public record ScreenBlockDataPayload(BlockPos pos) implements FabricPacket {
+    public static final PacketType<ScreenBlockDataPayload> TYPE = PacketType.create(RenameMod.id("screen_data"), ScreenBlockDataPayload::new);
 //?}
 
     public ScreenBlockDataPayload(FriendlyByteBuf buf) {
